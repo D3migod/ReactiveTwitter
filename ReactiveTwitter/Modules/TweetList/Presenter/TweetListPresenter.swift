@@ -7,3 +7,37 @@
 //
 
 import Foundation
+import ReactiveSwift
+
+class TweetListPresenter: TweetListPresenterProtocol {
+    
+    weak var view: TweetListViewProtocol!
+    
+    var interactor: TweetListInteractorProtocol!
+    
+    var wireFrame: TweetListWireFrameProtocol!
+    
+    // MARK: - Input
+    var paused: Bool = false {
+        didSet {
+            interactor.paused.value = paused
+        }
+    }
+    
+    // MARK: - Output
+    var tweets: MutableProperty<[Tweet]>!
+    var loggedIn: MutableProperty<Bool>!
+    
+    init(view: TweetListViewProtocol,
+         interactor: TweetListInteractorInputProtocol,
+         wireFrame: TweetListWireFrameProtocol) {
+        self.view = view
+        self.interactor = interactor
+        self.wireFrame = wireFrame
+        
+        tweets <~ interactor.tweetsProducer
+        loggedIn <~ interactor.account
+    }
+    
+    
+}

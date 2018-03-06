@@ -41,13 +41,13 @@ extension TweetListView: UITableViewDataSource, UITableViewDelegate {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "TweetCell", for: indexPath) as! TweetTableViewCell
         
-        cell.update(with: presenter.getTweet(at: indexPath.row))
+        cell.update(with: presenter.tweets.value[indexPath.row])
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return presenter.getTweetsCount()
+        return presenter.tweets.value.count
     }
     
 }

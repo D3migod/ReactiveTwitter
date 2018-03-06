@@ -8,6 +8,7 @@
 
 import UIKit
 import ReactiveSwift
+import Result
 
 protocol TweetListViewProtocol: class {
     var presenter: TweetListPresenterProtocol? { get set }
@@ -29,30 +30,24 @@ protocol TweetListWireFrameProtocol: class {
 }
 
 protocol TweetListPresenterProtocol: class {
-    var view: TweetListViewProtocol? { get set }
-    var interactor: TweetListInteractorInputProtocol? { get set }
-    var wireFrame: TweetListWireFrameProtocol? { get set }
+    var view: TweetListViewProtocol! { get set }
+    var interactor: TweetListInteractorProtocol! { get set }
+    var wireFrame: TweetListWireFrameProtocol! { get set }
     
-    var tweets: Property<[Tweet]> { get set }
-    var loggedIn: Property<Bool> { get set }
-    
-    func getTweet(at index: Int) -> Tweet
-    func getTweetsCount() -> Int
+    var tweets: MutableProperty<[Tweet]>! { get }
+    var loggedIn: MutableProperty<Bool>! { get }
 }
 
-protocol TweetListInteractorOutputProtocol: class {
-    // INTERACTOR -> PRESENTER
-    func didRetrieveTweets(_ Tweets: [Tweet])
-    func onError()
-}
-
-protocol TweetListInteractorInputProtocol: class {
-    var presenter: TweetListInteractorOutputProtocol? { get set }
+protocol TweetListInteractorProtocol: class {
     var localDatamanager: TweetListLocalDataManagerInputProtocol? { get set }
     var remoteDatamanager: TweetListRemoteDataManagerInputProtocol? { get set }
     
     // PRESENTER -> INTERACTOR
-    func retrieveTweetList()
+    var paused: MutableProperty<Bool>! { get set }
+    
+    // INTERACTOR -> Presenter
+    var tweetsProducer: SignalProducer<[Tweet], NoError>! { get set }
+    var account: Signal<Bool, NoError>! { get set }
 }
 
 protocol TweetListDataManagerInputProtocol: class {

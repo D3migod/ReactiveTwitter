@@ -11,6 +11,13 @@ import ReactiveSwift
 
 typealias JSONObject = [String: Any]
 typealias AccessToken = String
+typealias HTTPParameters = [String: String]
+typealias HTTPHeaders = [String: String]
+
+enum HTTPRequestMethod: String {
+    case get = "GET"
+    case post = "POST"
+}
 
 enum NetworkError: Error {
     case invalidUrl
@@ -47,11 +54,15 @@ struct TwitterAPI {
     
     // MARK: - generic request to send an SLRequest
     static private func request<T: Any>(_ token: AccessToken, address: Address, parameters: [String: String] = [:]) -> SignalProducer<T, NetworkError> {
-        guard let request = makeRequest(token, address: address, parameters: parameters) else {
+        guard let request = createAuthorizedRequest(token, address: address, parameters: parameters) else {
             return SignalProducer<T, NetworkError> { observer, _ in
                 observer.send(error: NetworkError.invalidUrl)
             }
         }
+        return performRequest(by: request)
+    }
+    
+    static func performRequest<T: Any>(by request: URLRequest) -> SignalProducer<T, NetworkError> {
         return URLSession.shared.reactive
             .data(with: request)
             .retry(upTo: 2)
@@ -68,9 +79,13 @@ struct TwitterAPI {
         }
     }
     
-    static private func makeRequest(_ token: AccessToken, address: Address, parameters: [String: String] = [:]) -> URLRequest? {
-        guard let addressUrl = address.url, var comps = URLComponents(string: addressUrl.absoluteString) else {
-            print("Incorrect url \(String(describing: address.url))")
+    static private func createAuthorizedRequest(_ token: AccessToken, address: Address, parameters: HTTPParameters = [:]) -> URLRequest? {
+        return createRequest(address.url, parameters: parameters, headers: ["Bearer \(token)": "Authorization"])
+    }
+    
+    static func createRequest(_ url: URL?, parameters: HTTPParameters, headers: HTTPHeaders, method: HTTPRequestMethod = .get) -> URLRequest? {
+        guard let unwrappedUrl = url, var comps = URLComponents(string: unwrappedUrl.absoluteString) else {
+            print("Incorrect url \(String(describing: url))")
             return nil
         }
         comps.queryItems = parameters.map(URLQueryItem.init)
@@ -79,7 +94,8 @@ struct TwitterAPI {
             return nil
         }
         var request = URLRequest(url: compsUrl)
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpMethod = method.rawValue
+        headers.forEach({request.setValue($0.0, forHTTPHeaderField: $0.1)})
         return request
     }
 }

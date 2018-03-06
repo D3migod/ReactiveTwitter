@@ -7,3 +7,22 @@
 //
 
 import Foundation
+import ReactiveSwift
+import Result
+
+class TweetListInteractor: TweetListInteractorProtocol {
+    
+    var localDatamanager: TweetListLocalDataManagerInputProtocol?
+    
+    var remoteDatamanager: TweetListRemoteDataManagerInputProtocol?
+    
+    var paused: MutableProperty<Bool>!
+    
+    var tweetsProducer: SignalProducer<[Tweet], NoError>!
+    
+    var account: Signal<Bool, NoError>!
+    
+    init() {
+        account = 
+    }
+}
