@@ -29,14 +29,16 @@ class TweetListPresenter: TweetListPresenterProtocol {
     var loggedIn: MutableProperty<Bool>!
     
     init(view: TweetListViewProtocol,
-         interactor: TweetListInteractorInputProtocol,
+         interactor: TweetListInteractorProtocol,
          wireFrame: TweetListWireFrameProtocol) {
         self.view = view
         self.interactor = interactor
         self.wireFrame = wireFrame
         
+        // Subscribe to interactor changes of tweets (in local database)
         tweets <~ interactor.tweetsProducer
-        loggedIn <~ interactor.account
+        // Subscribe to interactor changes of account visibility
+        loggedIn <~ interactor.account 
     }
     
     

@@ -12,17 +12,34 @@ import Result
 
 class TweetListInteractor: TweetListInteractorProtocol {
     
-    var localDatamanager: TweetListLocalDataManagerInputProtocol?
+    var localDatamanager: TweetListLocalDataManagerProtocol!
     
-    var remoteDatamanager: TweetListRemoteDataManagerInputProtocol?
+    var remoteDatamanager: TweetListRemoteDataManagerProtocol!
     
     var paused: MutableProperty<Bool>!
     
     var tweetsProducer: SignalProducer<[Tweet], NoError>!
     
-    var account: Signal<Bool, NoError>!
+    var account: SignalProducer<Bool, NoError>!
     
-    init() {
-        account = 
+    init(localDatamanager: TweetListLocalDataManagerProtocol,
+         remoteDatamanager: TweetListRemoteDataManagerProtocol,
+         account: SignalProducer<Bool, NoError>) {
+//        account = TwitterAccount().account.map { status in
+//            switch status {
+//            case .unavailable: return false
+//            case .authorized: return true
+//            }
+//        }
+        self.account = account
+        self.localDatamanager = localDatamanager
+        self.remoteDatamanager = remoteDatamanager
+        
+        tweetsProducer = localDatamanager.tweetsProducer
+        remoteDatamanager.tweetsProducer.startWithValues { changes in
+            localDatamanager.updateChanges(changes)
+        }
+        // Subscribe to remoteDatamanager and update localDatamanager on every new data
+        
     }
 }

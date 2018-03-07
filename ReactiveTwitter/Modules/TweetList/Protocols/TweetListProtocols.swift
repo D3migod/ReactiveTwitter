@@ -39,36 +39,26 @@ protocol TweetListPresenterProtocol: class {
 }
 
 protocol TweetListInteractorProtocol: class {
-    var localDatamanager: TweetListLocalDataManagerInputProtocol? { get set }
-    var remoteDatamanager: TweetListRemoteDataManagerInputProtocol? { get set }
+    var localDatamanager: TweetListLocalDataManagerProtocol! { get set }
+    var remoteDatamanager: TweetListRemoteDataManagerProtocol! { get set }
     
     // PRESENTER -> INTERACTOR
     var paused: MutableProperty<Bool>! { get set }
     
     // INTERACTOR -> Presenter
     var tweetsProducer: SignalProducer<[Tweet], NoError>! { get set }
-    var account: Signal<Bool, NoError>! { get set }
+    var account: SignalProducer<Bool, NoError>! { get set }
 }
 
 protocol TweetListDataManagerInputProtocol: class {
     // INTERACTOR -> DATAMANAGER
 }
 
-protocol TweetListRemoteDataManagerInputProtocol: class {
-    var remoteRequestHandler: TweetListRemoteDataManagerOutputProtocol? { get set }
-    
-    // INTERACTOR -> REMOTEDATAMANAGER
-    func retrieveTweetList()
+protocol TweetListRemoteDataManagerProtocol: class {
+    var tweetsProducer: SignalProducer<[Tweet], NetworkError> { get set }
 }
 
-protocol TweetListRemoteDataManagerOutputProtocol: class {
-    // REMOTEDATAMANAGER -> INTERACTOR
-    func onTweetsRetrieved(_ Tweets: [Tweet])
-    func onError()
-}
 
-protocol TweetListLocalDataManagerInputProtocol: class {
-    // INTERACTOR -> LOCALDATAMANAGER
-    func retrieveTweetList() throws -> [Tweet]
-    func saveTweet(id: Int, title: String, imageUrl: String, thumbImageUrl: String) throws
+protocol TweetListLocalDataManagerProtocol: class {
+    var tweetsProducer: SignalProducer<[Tweet], NetworkError> { get set }
 }
