@@ -10,13 +10,17 @@ import Foundation
 import ReactiveSwift
 import Result
 
-// logged or not
-enum AccountStatus {
-    case unavailable
-    case authorized(AccessToken)
-}
+
 
 struct TwitterAccount {
+    
+    static let shared = TwitterAccount()
+    
+    // logged or not
+    enum AccountStatus {
+        case unavailable
+        case authorized(AccessToken)
+    }
     
     fileprivate static let tokenPersistanceKey = "ReactiveTwitter token"
     
@@ -36,7 +40,30 @@ struct TwitterAccount {
         }
     }
     
-
+    var account: SignalProducer<AccountStatus, NoError> {
+        if let token = token {
+            return SignalProducer(value: AccountStatus.authorized(token))
+        } else {
+            return getTokenRequestSignalProducer()
+                .flatMapError { _ in
+                    return SignalProducer<String, NoError>(value: "")
+                }
+                .map { token in
+                    token.isEmpty ? AccountStatus.unavailable : AccountStatus.authorized(token)
+            }
+        }
+    }
+    
+    var isAuthorized: SignalProducer<Bool, NoError> {
+        get {
+            return account.map { status in
+                switch status {
+                case .unavailable: return false
+                case .authorized: return true
+                }
+            }
+        }
+    }
     
     enum Errors: Error {
         case unableToGetToken, invalidResponse
@@ -70,17 +97,5 @@ struct TwitterAccount {
         return (key: "Authorization", value: "Basic \(credential)")
     }
     
-    var account: SignalProducer<AccountStatus, NoError> {
-        if let token = token {
-            return SignalProducer(value: AccountStatus.authorized(token))
-        } else {
-        return getTokenRequestSignalProducer()
-            .flatMapError { _ in
-                return SignalProducer<String, NoError>(value: "")
-            }
-            .map { token in
-                token.isEmpty ? AccountStatus.unavailable : AccountStatus.authorized(token)
-            }
-        }
-    }
+    
 }

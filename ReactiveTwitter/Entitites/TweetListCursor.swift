@@ -9,7 +9,14 @@
 import Foundation
 
 struct TweetListCursor {
-    let maxId: Int64 = 0
-    let sinceId: Int64 = 0
+    let maxId: Int64
+    let sinceId: Int64
+    
+    init(max: Int64, since: Int64) {
+        maxId = max
+        sinceId = since
+    }
+    
+    static var none: TweetListCursor { return TweetListCursor(max: Int64.max, since: 0) }
 }
 

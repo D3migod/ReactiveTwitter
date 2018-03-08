@@ -8,6 +8,7 @@
 
 import Foundation
 import ReactiveSwift
+import Result
 
 typealias JSONObject = [String: Any]
 typealias AccessToken = String
@@ -25,10 +26,10 @@ enum NetworkError: Error {
 }
 
 protocol TwitterAPIProtcol {
-    static func getTweetList(for hashtag: String) -> (AccessToken, TweetListCursor) -> Signal<[JSONObject], NetworkError>
+    static func getTweetList(for hashtag: String) -> (AccessToken, TweetListCursor) -> SignalProducer<Data, NetworkError>
 }
 
-struct TwitterAPI {
+struct TwitterAPI: TwitterAPIProtcol {
     
     fileprivate enum Address: String {
         case search = "search/tweets.json"
@@ -40,7 +41,7 @@ struct TwitterAPI {
         }
     }
     
-    static func getTweetList(for hashtag: String) -> (AccessToken, TweetListCursor) -> SignalProducer<[JSONObject], NetworkError> {
+    static func getTweetList(for hashtag: String) -> (AccessToken, TweetListCursor) -> SignalProducer<Data, NetworkError> {
         return { account, cursor in
             return request(account,
                            address: TwitterAPI.Address.search,

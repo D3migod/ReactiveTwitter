@@ -11,12 +11,18 @@ import ReactiveSwift
 import ReactiveCocoa
 import Result
 
-class TweetListView: UIViewController {
+class TweetListView: UIViewController, TweetListViewProtocol {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var messageView: UIView!
     
     var presenter: TweetListPresenterProtocol!
+    
+    static func createWith(storyboard: UIStoryboard, presenter: TweetListPresenterProtocol) -> TweetListView {
+        let tweetListView = storyboard.instantiateViewController(ofType: TweetListView.self)
+        tweetListView.presenter = presenter
+        return tweetListView
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

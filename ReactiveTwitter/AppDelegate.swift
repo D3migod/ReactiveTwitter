@@ -14,9 +14,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    let testing = NSClassFromString("XCTest") != nil
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        TwitterAccount.set(key: "R7DxgkHrZx6jn6oNDDGdaChAU",
+                           secret: "sVszTxLLjm1CCLHt3u3FssMc5YZlYSksQjlPLWD59TM0wMWbbQ")
+        
+        if !testing {
+            window = UIWindow(frame: UIScreen.main.bounds)
+            window?.rootViewController = TweetListWireFrame.createConnections()
+            window?.makeKeyAndVisible()
+        }
         return true
     }
 

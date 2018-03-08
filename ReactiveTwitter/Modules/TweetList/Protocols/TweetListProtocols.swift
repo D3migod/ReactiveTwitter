@@ -11,26 +11,14 @@ import ReactiveSwift
 import Result
 
 protocol TweetListViewProtocol: class {
-    var presenter: TweetListPresenterProtocol? { get set }
-    
-    // PRESENTER -> VIEW
-    func showTweets(with Tweets: [Tweet])
-    
-    func showError()
-    
-    func showLoading()
-    
-    func hideLoading()
+    var presenter: TweetListPresenterProtocol! { get set }
 }
 
 protocol TweetListWireFrameProtocol: class {
-    static func createTweetListModule() -> UIViewController
-    // PRESENTER -> WIREFRAME
-    func presentTweetDetailScreen(from view: TweetListViewProtocol, forTweet Tweet: Tweet)
+    static func createConnections() -> UIViewController
 }
 
 protocol TweetListPresenterProtocol: class {
-    var view: TweetListViewProtocol! { get set }
     var interactor: TweetListInteractorProtocol! { get set }
     var wireFrame: TweetListWireFrameProtocol! { get set }
     
@@ -46,7 +34,7 @@ protocol TweetListInteractorProtocol: class {
     var paused: MutableProperty<Bool>! { get set }
     
     // INTERACTOR -> Presenter
-    var tweetsProducer: SignalProducer<[Tweet], NoError>! { get set }
+    var tweetsProducer: SignalProducer<[Tweet], NoError>! { get }
     var account: SignalProducer<Bool, NoError>! { get set }
 }
 
@@ -55,10 +43,10 @@ protocol TweetListDataManagerInputProtocol: class {
 }
 
 protocol TweetListRemoteDataManagerProtocol: class {
-    var tweetsProducer: SignalProducer<[Tweet], NetworkError> { get set }
+    var tweetsProducer: SignalProducer<[Tweet], NoError>! { get set }
 }
 
 
 protocol TweetListLocalDataManagerProtocol: class {
-    var tweetsProducer: SignalProducer<[Tweet], NetworkError> { get set }
+    var tweetsProducer: SignalProducer<[Tweet], NoError>! { get set }
 }

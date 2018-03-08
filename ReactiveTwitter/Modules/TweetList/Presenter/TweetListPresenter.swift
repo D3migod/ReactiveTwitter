@@ -11,8 +11,6 @@ import ReactiveSwift
 
 class TweetListPresenter: TweetListPresenterProtocol {
     
-    weak var view: TweetListViewProtocol!
-    
     var interactor: TweetListInteractorProtocol!
     
     var wireFrame: TweetListWireFrameProtocol!
@@ -25,13 +23,11 @@ class TweetListPresenter: TweetListPresenterProtocol {
     }
     
     // MARK: - Output
-    var tweets: MutableProperty<[Tweet]>!
+    var tweets: MutableProperty<[Tweet]>! //private(set)
     var loggedIn: MutableProperty<Bool>!
     
-    init(view: TweetListViewProtocol,
-         interactor: TweetListInteractorProtocol,
+    init(interactor: TweetListInteractorProtocol,
          wireFrame: TweetListWireFrameProtocol) {
-        self.view = view
         self.interactor = interactor
         self.wireFrame = wireFrame
         
