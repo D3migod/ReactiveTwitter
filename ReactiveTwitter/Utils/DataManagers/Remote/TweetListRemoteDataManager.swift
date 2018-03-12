@@ -12,7 +12,6 @@ import ReactiveCocoa
 import Result
 
 class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
-    
     private let feedCursor = MutableProperty<TweetListCursor>(.none)
     
     private let hashtagQuery = MutableProperty<String>("")
@@ -21,10 +20,10 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
     let paused = MutableProperty<Bool>(false)
     
     // MARK: output
-    var getTweetsAction: Action<String, [Tweet], NoError>!
+    var getTweetsAction: Action<Query, [Tweet], NoError>!
     
     init(account: SignalProducer<TwitterAccount.AccountStatus, NoError>) {
-        getTweetsAction = Action<String, [Tweet], NoError> { value in
+        getTweetsAction = Action<Query, [Tweet], NoError> { value in
             return self.createDataProvider(account: account, jsonProvider: TwitterAPI.getTweetList(for: value))
         }
     }
@@ -32,7 +31,7 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
     
     // TODO: Change to action
     private func createDataProvider(account: SignalProducer<TwitterAccount.AccountStatus, NoError>,
-         jsonProvider: @escaping (AccessToken, TweetListCursor) -> SignalProducer<Data, NetworkError>) -> SignalProducer<[Tweet], NoError> {
+         jsonProvider: @escaping (AccessToken) -> SignalProducer<Data, NetworkError>) -> SignalProducer<[Tweet], NoError> {
 
         let currentAccount: SignalProducer<AccessToken, NoError> = account
             .filter { account in
@@ -62,26 +61,14 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
         
         // Re-fetch the feed
         let tweetsProducer = reachableTimerWithAccount
-            .withLatest(from: feedCursor.producer)
-            .flatMap(.latest) { token, cursor in
-                jsonProvider(token, cursor)
+            .flatMap(.latest) { token in
+                jsonProvider(token)
             }
             .flatMapError  { _ in SignalProducer<Data, NoError>.empty }
             .map { value in
                 try! JSONDecoder().decode([Tweet].self, from: value)
         }
         
-        // Increase feedCursor on every tweetsProducer .nextValue event
-        feedCursor <~ tweetsProducer
-            .scan(.none, TweetListRemoteDataManager.currentCursor)
         return tweetsProducer
-    }
-    
-    static func currentCursor(lastCursor: TweetListCursor, tweets: [Tweet]) -> TweetListCursor {
-        return tweets.reduce(lastCursor) { status, tweet in
-            let max: Int64 = tweet.id < status.maxId ? tweet.id-1 : status.maxId
-            let since: Int64 = tweet.id > status.sinceId ? tweet.id : status.sinceId
-            return TweetListCursor(max: max, since: since)
-        }
     }
 }

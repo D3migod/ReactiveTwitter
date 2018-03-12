@@ -17,7 +17,7 @@ class TweetListView: UIViewController, TweetListViewProtocol {
     
     @IBOutlet weak var messageView: UIView!
     
-    @IBOutlet weak var searchTextField: UITextField!
+    @IBOutlet weak var searchBar: UISearchBar!
     
     var prefetchSignal: Signal<[Int], NoError>!
     
@@ -53,7 +53,7 @@ class TweetListView: UIViewController, TweetListViewProtocol {
         self.prefetchObserver = prefetchObserver
         
         Signal
-            .combineLatest(prefetchSignal, searchTextField.reactive.continuousTextValues.throttle(0.5, on: QueueScheduler.main))
+            .combineLatest(prefetchSignal, searchBar.reactive.continuousTextValues.throttle(0.5, on: QueueScheduler.main))
             .combinePrevious()
             .map { value -> ([Int], String?) in
                 let (previousValue, currentValue) = value

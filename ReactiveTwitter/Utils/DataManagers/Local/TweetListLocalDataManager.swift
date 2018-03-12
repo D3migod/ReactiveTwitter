@@ -44,14 +44,14 @@ class TweetListLocalDataManager: TweetListLocalDataManagerProtocol {
         }
         
         let fetchRequest: NSFetchRequest<Tweet> = NSFetchRequest(entityName: String(describing: Tweet.self))
-        fetchRequest.fetchLimit = count
+        fetchRequest.fetchLimit = query.0.2
         fetchRequest.predicate = buildPredicate(for: query)
 
         return try managedOC.fetch(fetchRequest)
     }
     
     fileprivate func buildPredicate(for query: Query) -> NSPredicate {
-        let ((minId, maxId, count), searchString) = query
+        let ((minId, maxId, _), searchString) = query
         var queryString = ""
         var argumentArray = [Any]()
         if let maxId = maxId {

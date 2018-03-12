@@ -45,19 +45,23 @@ class TweetListPresenter: TweetListPresenterProtocol {
         self.interactor = interactor
         self.wireFrame = wireFrame
         
+        loggedIn = MutableProperty<Bool>(false)
+        maxId = MutableProperty<Int64>(0)
+        minId = MutableProperty<Int64>(0)
+        tweets = MutableProperty<[Tweet]>([])
         // Subscribe to interactor changes of account visibility
         loggedIn <~ interactor.account
         
-        maxId <~ interactor.tweetsProducer
-            .combineLatest(with: maxId.producer)
+        maxId <~ interactor.tweetsSignal
+            .combineLatest(with: maxId.signal)
             .map { newTweets, currentMax -> (Int64?) in
                 guard let receivedMax = newTweets.map({$0.id}).max() else { return nil }
                 return receivedMax > currentMax ? receivedMax : nil
             }
             .skipNil()
         
-        minId <~ interactor.tweetsProducer
-            .combineLatest(with: maxId.producer)
+        minId <~ interactor.tweetsSignal
+            .combineLatest(with: maxId.signal)
             .map { newTweets, currentMin -> (Int64?) in
                 guard let receivedMin = newTweets.map({$0.id}).min() else { return nil }
                 return receivedMin < currentMin ? receivedMin : nil
@@ -86,7 +90,7 @@ class TweetListPresenter: TweetListPresenterProtocol {
         
         // Subscribe to interactor changes of tweets (in local database)
         tweets <~ SignalProducer.combineLatest(
-            interactor.tweetsProducer,
+            interactor.tweetsSignal,
             tweets.producer,
             SignalProducer(prefetchSignal))
             .map { newTweets, currentTweets, lastQuery in

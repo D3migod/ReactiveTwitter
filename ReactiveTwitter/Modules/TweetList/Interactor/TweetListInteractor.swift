@@ -19,7 +19,7 @@ class TweetListInteractor: TweetListInteractorProtocol {
     
     var paused: MutableProperty<Bool>!
     
-    var tweetsSignal: Signal<[Tweet], PersistanceError>!
+    var tweetsSignal: Signal<[Tweet], NoError>!
     
     var tweetsObserver: Signal<[Tweet], NoError>.Observer!
     
@@ -37,23 +37,26 @@ class TweetListInteractor: TweetListInteractorProtocol {
         self.tweetsObserver = tweetsObserver
         self.prefetchObserver = Signal<Query, NoError>.Observer(
             value: { query in
-                remoteDatamanager.getTweetsAction.apply(query)
-                    .startWithValues { tweets in
+                remoteDatamanager.getTweetsAction.apply(query).startWithResult { (result) in
+                    switch result {
+                    case .success(let tweets):
                         localDatamanager.save(tweets)
                         tweetsObserver.send(value: tweets)
+                    case .failure(let error):
+                        print("Error occurred: \(error)")
+                        break
+                    }
                 }
                 
-                tweetsObserver.send(value: )
-                
-            // If postIndices.isEmpty:
-                // Retrieve first postIndices.count most fresh posts for the query from localDatamaner
-                // Ask for remoteDataManager for new Posts if postIndices is 0
-            // else:
-                // if localDatamanager has postIndices.count posts older than currently shown
-                    // do nothing
-                // else:
-                    // ask for remoteDatamanager to load postIndices.count posts older than the oldest ones
-                    // Save loaded posts
+                guard let tweets = try? localDatamanager.getTweets(for: query) else {
+                    print("Error occured")
+                    return
+                }
+                guard tweets.count > 0 else {
+                    print("No tweets count")
+                    return
+                }
+                tweetsObserver.send(value: tweets)
         })
     }
 }

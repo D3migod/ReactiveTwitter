@@ -26,7 +26,7 @@ enum NetworkError: Error {
 }
 
 protocol TwitterAPIProtcol {
-    static func getTweetList(for hashtag: String) -> (AccessToken, TweetListCursor) -> SignalProducer<Data, NetworkError>
+    static func getTweetList(for query: Query) -> (AccessToken) -> SignalProducer<Data, NetworkError>
 }
 
 struct TwitterAPI: TwitterAPIProtcol {
@@ -41,15 +41,18 @@ struct TwitterAPI: TwitterAPIProtcol {
         }
     }
     
-    static func getTweetList(for hashtag: String) -> (AccessToken, TweetListCursor) -> SignalProducer<Data, NetworkError> {
-        return { account, cursor in
+    static func getTweetList(for query: Query) -> (AccessToken) -> SignalProducer<Data, NetworkError> {
+        let ((minId, maxId, count), hashtag) = query
+        return { account in
             var parameters = ["q": "%23\(hashtag)",
                 "result_type": "mixed",
-                "count": "100",
+                "count": String(count),
                 "include_entities": "true"]
-            if cursor != TweetListCursor.none {
-                parameters["max_id"]   = String(cursor.maxId)
-                parameters["since_id"] = String(cursor.sinceId)
+            if let minIdUnwrapped = minId {
+                parameters["since_id"] = String(minIdUnwrapped)
+            }
+            if let maxIdUnwrapped = maxId {
+                parameters["max_id"] = String(maxIdUnwrapped)
             }
             return request(account,
                            address: TwitterAPI.Address.search,
