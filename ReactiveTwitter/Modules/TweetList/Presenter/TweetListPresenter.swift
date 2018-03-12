@@ -8,8 +8,17 @@
 
 import Foundation
 import ReactiveSwift
+import Result
+
+typealias Query = ((Int64?, Int64?, Int), String) // TODO: Change to typealias
 
 class TweetListPresenter: TweetListPresenterProtocol {
+    
+    fileprivate static let defaultPageSize = 10
+    
+    var prefetchObserver: Signal<([Int], String?), NoError>.Observer!
+    
+    var prefetchSignal: Signal<Query, NoError>!
     
     var interactor: TweetListInteractorProtocol!
     
@@ -24,17 +33,70 @@ class TweetListPresenter: TweetListPresenterProtocol {
     
     // MARK: - Output
     var tweets: MutableProperty<[Tweet]>! //private(set)
+    
     var loggedIn: MutableProperty<Bool>!
+    
+    var maxId: MutableProperty<Int64>!
+    
+    var minId: MutableProperty<Int64>!
     
     init(interactor: TweetListInteractorProtocol,
          wireFrame: TweetListWireFrameProtocol) {
         self.interactor = interactor
         self.wireFrame = wireFrame
         
-        // Subscribe to interactor changes of tweets (in local database)
-        tweets <~ interactor.tweetsProducer
         // Subscribe to interactor changes of account visibility
-        loggedIn <~ interactor.account 
+        loggedIn <~ interactor.account
+        
+        maxId <~ interactor.tweetsProducer
+            .combineLatest(with: maxId.producer)
+            .map { newTweets, currentMax -> (Int64?) in
+                guard let receivedMax = newTweets.map({$0.id}).max() else { return nil }
+                return receivedMax > currentMax ? receivedMax : nil
+            }
+            .skipNil()
+        
+        minId <~ interactor.tweetsProducer
+            .combineLatest(with: maxId.producer)
+            .map { newTweets, currentMin -> (Int64?) in
+                guard let receivedMin = newTweets.map({$0.id}).min() else { return nil }
+                return receivedMin < currentMin ? receivedMin : nil
+            }
+            .skipNil()
+        
+        let (prefetchSignal, prefetchObserver) = Signal<([Int], String?), NoError>.pipe()
+        self.prefetchSignal = Signal.combineLatest(
+            prefetchSignal,
+            tweets.signal,
+            minId.signal)
+            .map { (prefetchQuery, tweets, minId) -> Query? in
+                let (indices, hashtag) = prefetchQuery
+                guard let unwrappedHashtag = hashtag else { return nil }
+                if indices.isEmpty {
+                    return ((nil, nil, TweetListPresenter.defaultPageSize), unwrappedHashtag)
+                } else {
+                    guard let maxIndex = indices.max() else { return nil}
+                    if maxIndex + 1 > tweets.count {
+                        return ((nil, minId-1, TweetListPresenter.defaultPageSize), unwrappedHashtag)
+                    }
+                    return nil
+                }
+            }
+            .skipNil()
+        
+        // Subscribe to interactor changes of tweets (in local database)
+        tweets <~ SignalProducer.combineLatest(
+            interactor.tweetsProducer,
+            tweets.producer,
+            SignalProducer(prefetchSignal))
+            .map { newTweets, currentTweets, lastQuery in
+                let indices = lastQuery.0
+                return indices.count == 0 ? newTweets : currentTweets + newTweets // TODO: Handle tweet update
+        }
+        
+        self.prefetchObserver = prefetchObserver
+        
+        self.prefetchSignal.observe(interactor.prefetchObserver)
     }
     
     

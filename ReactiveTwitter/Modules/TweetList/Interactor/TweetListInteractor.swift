@@ -11,6 +11,7 @@ import ReactiveSwift
 import Result
 
 class TweetListInteractor: TweetListInteractorProtocol {
+    var prefetchObserver: Signal<Query, NoError>.Observer!
     
     var localDatamanager: TweetListLocalDataManagerProtocol!
     
@@ -18,11 +19,9 @@ class TweetListInteractor: TweetListInteractorProtocol {
     
     var paused: MutableProperty<Bool>!
     
-    var tweetsProducer: SignalProducer<[Tweet], NoError>! {
-        get {
-            return remoteDatamanager.tweetsProducer
-        }
-    }
+    var tweetsSignal: Signal<[Tweet], PersistanceError>!
+    
+    var tweetsObserver: Signal<[Tweet], NoError>.Observer!
     
     var account: SignalProducer<Bool, NoError>!
     
@@ -32,6 +31,29 @@ class TweetListInteractor: TweetListInteractorProtocol {
         self.account = account
         self.localDatamanager = localDatamanager
         self.remoteDatamanager = remoteDatamanager
-        remoteDatamanager.tweetsProducer.
+        
+        let (tweetsSignal, tweetsObserver) = Signal<[Tweet], NoError>.pipe()
+        self.tweetsSignal = tweetsSignal
+        self.tweetsObserver = tweetsObserver
+        self.prefetchObserver = Signal<Query, NoError>.Observer(
+            value: { query in
+                remoteDatamanager.getTweetsAction.apply(query)
+                    .startWithValues { tweets in
+                        localDatamanager.save(tweets)
+                        tweetsObserver.send(value: tweets)
+                }
+                
+                tweetsObserver.send(value: )
+                
+            // If postIndices.isEmpty:
+                // Retrieve first postIndices.count most fresh posts for the query from localDatamaner
+                // Ask for remoteDataManager for new Posts if postIndices is 0
+            // else:
+                // if localDatamanager has postIndices.count posts older than currently shown
+                    // do nothing
+                // else:
+                    // ask for remoteDatamanager to load postIndices.count posts older than the oldest ones
+                    // Save loaded posts
+        })
     }
 }

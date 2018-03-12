@@ -14,7 +14,16 @@ import Result
 class TweetListView: UIViewController, TweetListViewProtocol {
     
     @IBOutlet weak var tableView: UITableView!
+    
     @IBOutlet weak var messageView: UIView!
+    
+    @IBOutlet weak var searchTextField: UITextField!
+    
+    var prefetchSignal: Signal<[Int], NoError>!
+    
+    var prefetchObserver: Signal<[Int], NoError>.Observer!
+    
+    var combinedIndexPaths: Signal<([Int], String?), NoError>!
     
     var presenter: TweetListPresenterProtocol!
     
@@ -31,13 +40,25 @@ class TweetListView: UIViewController, TweetListViewProtocol {
         tableView.tableFooterView = UIView()
         tableView.delegate = self
         tableView.dataSource = self
-        
+        tableView.prefetchDataSource = self
         bindUI()
     }
     
     func bindUI() {
         tableView.reactive.reloadData <~ presenter.tweets.producer.map { _ in }
         messageView.reactive.isHidden <~ presenter.loggedIn.producer
+        
+        let (prefetchSignal, prefetchObserver) = Signal<[Int], NoError>.pipe()
+        self.prefetchSignal = prefetchSignal
+        self.prefetchObserver = prefetchObserver
+        
+        Signal
+            .combineLatest(prefetchSignal, searchTextField.reactive.continuousTextValues.throttle(0.5, on: QueueScheduler.main))
+            .combinePrevious()
+            .map { value -> ([Int], String?) in
+                let (previousValue, currentValue) = value
+                return previousValue.1 != currentValue.1 ? ([], currentValue.1) : currentValue
+        }.observe(presenter.prefetchObserver)
     }
 }
 
@@ -56,4 +77,10 @@ extension TweetListView: UITableViewDataSource, UITableViewDelegate {
         return presenter.tweets.value.count
     }
     
+}
+
+extension TweetListView: UITableViewDataSourcePrefetching {
+    public func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+        prefetchObserver.send(value: indexPaths.map{$0.row})
+    }
 }

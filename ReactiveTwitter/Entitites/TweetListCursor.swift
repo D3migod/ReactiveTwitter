@@ -20,3 +20,8 @@ struct TweetListCursor {
     static var none: TweetListCursor { return TweetListCursor(max: Int64.max, since: 0) }
 }
 
+extension TweetListCursor: Equatable {
+    static func ==(lhs: TweetListCursor, rhs: TweetListCursor) -> Bool {
+        return lhs.maxId==rhs.maxId && lhs.sinceId==rhs.sinceId
+    }
+}

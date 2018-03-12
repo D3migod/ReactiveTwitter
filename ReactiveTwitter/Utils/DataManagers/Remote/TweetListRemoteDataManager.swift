@@ -13,26 +13,27 @@ import Result
 
 class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
     
-    private let timerDelay = 30
     private let feedCursor = MutableProperty<TweetListCursor>(.none)
+    
+    private let hashtagQuery = MutableProperty<String>("")
     
     // MARK: input
     let paused = MutableProperty<Bool>(false)
     
     // MARK: output
-    var tweetsProducer: SignalProducer<[Tweet], NoError>!
+    var getTweetsAction: Action<String, [Tweet], NoError>!
     
-    convenience init(account: SignalProducer<TwitterAccount.AccountStatus, NoError>,
-                     hashtag: String,
-                     apiType: TwitterAPIProtcol.Type) {
-        self.init(account: account, jsonProvider: apiType.getTweetList(for: hashtag))
+    init(account: SignalProducer<TwitterAccount.AccountStatus, NoError>) {
+        getTweetsAction = Action<String, [Tweet], NoError> { value in
+            return self.createDataProvider(account: account, jsonProvider: TwitterAPI.getTweetList(for: value))
+        }
     }
     
-    private init(account: SignalProducer<TwitterAccount.AccountStatus, NoError>,
-         jsonProvider: @escaping (AccessToken, TweetListCursor) -> SignalProducer<Data, NetworkError>) {
-        //
-        // subscribe for the current twitter account
-        //
+    
+    // TODO: Change to action
+    private func createDataProvider(account: SignalProducer<TwitterAccount.AccountStatus, NoError>,
+         jsonProvider: @escaping (AccessToken, TweetListCursor) -> SignalProducer<Data, NetworkError>) -> SignalProducer<[Tweet], NoError> {
+
         let currentAccount: SignalProducer<AccessToken, NoError> = account
             .filter { account in
                 switch account {
@@ -50,29 +51,30 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
         
         // timer that emits a reachable logged account
         let reachableTimerWithAccount = SignalProducer.combineLatest(
-            SignalProducer.timer(interval: DispatchTimeInterval.seconds(timerDelay), on: QueueScheduler.main),
             Reachability.isConnected(),
             currentAccount,
             paused.producer)
-            .map {_, reachable, account, paused in
+            .map { reachable, account, paused in
             return (reachable && !paused) ? account : nil
             }
             .filter { $0 != nil }
             .map { $0! }
         
         // Re-fetch the feed
-        tweetsProducer = reachableTimerWithAccount
+        let tweetsProducer = reachableTimerWithAccount
             .withLatest(from: feedCursor.producer)
             .flatMap(.latest) { token, cursor in
                 jsonProvider(token, cursor)
             }
-            .flatMapError  { _ in SignalProducer.empty }
+            .flatMapError  { _ in SignalProducer<Data, NoError>.empty }
             .map { value in
                 try! JSONDecoder().decode([Tweet].self, from: value)
-            }
+        }
+        
+        // Increase feedCursor on every tweetsProducer .nextValue event
         feedCursor <~ tweetsProducer
             .scan(.none, TweetListRemoteDataManager.currentCursor)
-        
+        return tweetsProducer
     }
     
     static func currentCursor(lastCursor: TweetListCursor, tweets: [Tweet]) -> TweetListCursor {

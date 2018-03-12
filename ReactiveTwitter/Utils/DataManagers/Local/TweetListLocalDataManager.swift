@@ -11,27 +11,10 @@ import Result
 import CoreData
 
 class TweetListLocalDataManager: TweetListLocalDataManagerProtocol {
-    
+
     fileprivate static let tweetEntityName = "Tweet"
     
-    var tweetsProducer: SignalProducer<[Tweet], NoError>!
-    
-    init() {
-        tweetsProducer = SignalProducer<[Tweet], NoError>(value: []) // TODO: Remove the stub
-    }
-    
-    func retrievePostList() throws -> [Tweet]  {
-        
-        guard let managedOC = CoreDataStore.managedObjectContext else {
-            throw PersistenceError.managedObjectContextNotFound
-        }
-        
-        let request: NSFetchRequest<Tweet> = NSFetchRequest(entityName: String(describing: Tweet.self))
-        
-        return try managedOC.fetch(request)
-    }
-    
-    func saveTweet(id: Int, text: String, name: String, created: Date, imageUrl: String) throws {
+    fileprivate func saveTweet(_ toBeSavedTweet: Tweet) throws {
         guard let managedOC = CoreDataStore.managedObjectContext else {
             throw PersistenceError.managedObjectContextNotFound
         }
@@ -39,14 +22,49 @@ class TweetListLocalDataManager: TweetListLocalDataManagerProtocol {
         if let newTweet = NSEntityDescription.entity(forEntityName: TweetListLocalDataManager.tweetEntityName,
                                                     in: managedOC) {
             let tweet = Tweet(entity: newTweet, insertInto: managedOC)
-            tweet.id = Int64(id)
-            tweet.text = text
-            tweet.name = name
-            tweet.created = created
-            tweet.imageUrl = imageUrl
+            tweet.id = toBeSavedTweet.id
+            tweet.text = toBeSavedTweet.text
+            tweet.name = toBeSavedTweet.name
+            tweet.created = toBeSavedTweet.created
+            tweet.imageUrl = toBeSavedTweet.imageUrl
+            tweet.hashtags = toBeSavedTweet.hashtags
             try managedOC.save()
         }
         throw PersistenceError.couldNotSaveObject
         
+    }
+    
+    func save(_ tweets: [Tweet]) {
+        tweets.forEach{try? saveTweet($0)}
+    }
+    
+    func getTweets(for query: Query) throws -> [Tweet] {
+        guard let managedOC = CoreDataStore.managedObjectContext else {
+            throw PersistenceError.managedObjectContextNotFound
+        }
+        
+        let fetchRequest: NSFetchRequest<Tweet> = NSFetchRequest(entityName: String(describing: Tweet.self))
+        fetchRequest.fetchLimit = count
+        fetchRequest.predicate = buildPredicate(for: query)
+
+        return try managedOC.fetch(fetchRequest)
+    }
+    
+    fileprivate func buildPredicate(for query: Query) -> NSPredicate {
+        let ((minId, maxId, count), searchString) = query
+        var queryString = ""
+        var argumentArray = [Any]()
+        if let maxId = maxId {
+            queryString += "id < %@ AND "
+            argumentArray.append(maxId)
+        }
+        if let minId = minId {
+            queryString += "id > %@ AND "
+            argumentArray.append(minId)
+        }
+        queryString += "ANY hashtags.text == %@"
+        argumentArray.append(searchString)
+        
+        return NSPredicate(format: queryString, argumentArray: argumentArray)
     }
 }

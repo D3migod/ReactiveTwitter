@@ -24,6 +24,7 @@ protocol TweetListPresenterProtocol: class {
     
     var tweets: MutableProperty<[Tweet]>! { get }
     var loggedIn: MutableProperty<Bool>! { get }
+    var prefetchObserver: Signal<([Int], String?), NoError>.Observer! { get }
 }
 
 protocol TweetListInteractorProtocol: class {
@@ -32,21 +33,19 @@ protocol TweetListInteractorProtocol: class {
     
     // PRESENTER -> INTERACTOR
     var paused: MutableProperty<Bool>! { get set }
+    var prefetchObserver: Signal<((Int64?, Int64?, Int), String), NoError>.Observer! { get }
     
     // INTERACTOR -> Presenter
-    var tweetsProducer: SignalProducer<[Tweet], NoError>! { get }
+    var tweetsSignal: Signal<[Tweet], NoError>! { get }
     var account: SignalProducer<Bool, NoError>! { get set }
 }
 
-protocol TweetListDataManagerInputProtocol: class {
-    // INTERACTOR -> DATAMANAGER
-}
-
 protocol TweetListRemoteDataManagerProtocol: class {
-    var tweetsProducer: SignalProducer<[Tweet], NoError>! { get set }
+    var getTweetsAction: Action<Query, [Tweet], NoError>! { get set }
 }
 
 
 protocol TweetListLocalDataManagerProtocol: class {
-    var tweetsProducer: SignalProducer<[Tweet], NoError>! { get set }
+    func save(_ tweets: [Tweet])
+    func getTweets(for query: Query) throws -> [Tweet]
 }

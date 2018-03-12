@@ -43,12 +43,17 @@ struct TwitterAPI: TwitterAPIProtcol {
     
     static func getTweetList(for hashtag: String) -> (AccessToken, TweetListCursor) -> SignalProducer<Data, NetworkError> {
         return { account, cursor in
+            var parameters = ["q": "%23\(hashtag)",
+                "result_type": "mixed",
+                "count": "100",
+                "include_entities": "true"]
+            if cursor != TweetListCursor.none {
+                parameters["max_id"]   = String(cursor.maxId)
+                parameters["since_id"] = String(cursor.sinceId)
+            }
             return request(account,
                            address: TwitterAPI.Address.search,
-                           parameters: ["q": "%23\(hashtag)",
-                                        "result_type": "mixed",
-                                        "count": "100",
-                                        "include_entities": "true"])
+                           parameters: parameters)
         }
     }
     

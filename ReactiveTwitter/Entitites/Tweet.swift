@@ -15,18 +15,20 @@ class Tweet: NSManagedObject, Decodable {
     @NSManaged var name: String
     @NSManaged var created: Date?
     @NSManaged var imageUrl: String
+    @NSManaged var hashtags: [Hashtag]
     
     enum CodingKeys : String, CodingKey {
-        case id = "id"
-        case text = "text"
+        case id
+        case text
         case name = "user.name"
         case created = "created_at"
         case imageUrl = "user.profile_image_url_https"
+        case hashtags = "entities.hashtags"
     }
     
     required convenience init(from decoder: Decoder) throws {
         guard let context = decoder.userInfo[.context] as? NSManagedObjectContext else { fatalError() }
-        guard let entity = NSEntityDescription.entity(forEntityName: "MyManagedObject", in: context) else { fatalError() }
+        guard let entity = NSEntityDescription.entity(forEntityName: "Tweet", in: context) else { fatalError() }
         self.init(entity: entity, insertInto: nil)
         
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -36,10 +38,6 @@ class Tweet: NSManagedObject, Decodable {
         created = try values.decode(Date.self, forKey: .created)
         imageUrl = try values.decode(String.self, forKey: .imageUrl)
     }
-}
-
-extension CodingUserInfoKey {
-    static let context = CodingUserInfoKey(rawValue: "context")!
 }
 
 extension Tweet: Encodable {
@@ -52,5 +50,27 @@ extension Tweet: Encodable {
 extension Tweet {
     static func ==(lhs: Tweet, rhs: Tweet) -> Bool {
         return lhs.id == rhs.id
+    }
+}
+
+extension Tweet {
+    class Hashtag: NSManagedObject, Codable {
+        @NSManaged var text: String
+        enum CodingKeys : String, CodingKey {
+            case text
+        }
+        required convenience init(from decoder: Decoder) throws {
+            guard let context = decoder.userInfo[.context] as? NSManagedObjectContext else { fatalError() }
+            guard let entity = NSEntityDescription.entity(forEntityName: "Hashtag", in: context) else { fatalError() }
+            self.init(entity: entity, insertInto: nil)
+            
+            let values = try decoder.container(keyedBy: CodingKeys.self)
+            text = try values.decode(String.self, forKey: .text)
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(text, forKey: .text)
+        }
     }
 }

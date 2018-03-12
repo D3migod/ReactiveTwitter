@@ -21,7 +21,7 @@ class TweetListWireFrame: TweetListWireFrameProtocol {
         let wireFrame = TweetListWireFrame()
         let localDataManager: TweetListLocalDataManagerProtocol = TweetListLocalDataManager()
         let remoteDataManager: TweetListRemoteDataManagerProtocol =
-            TweetListRemoteDataManager(account: TwitterAccount.shared.account, hashtag: "", apiType: TwitterAPI.self)
+            TweetListRemoteDataManager(account: TwitterAccount.shared.account)
         let interactor: TweetListInteractorProtocol =
             TweetListInteractor(localDatamanager: localDataManager,
                                 remoteDatamanager: remoteDataManager,
