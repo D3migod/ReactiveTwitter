@@ -12,7 +12,7 @@ import Result
 
 
 
-struct TwitterAccount {
+class TwitterAccount {
     
     static let shared = TwitterAccount()
     
@@ -24,9 +24,9 @@ struct TwitterAccount {
     
     fileprivate static let tokenPersistanceKey = "ReactiveTwitter token"
     
-    static private var key: String!
-    static private var secret: String!
-    static public func set(key: String, secret: String) {
+    private var key: String!
+    private var secret: String!
+    public func set(key: String, secret: String) {
         self.key = key
         self.secret = secret
     }
@@ -41,26 +41,26 @@ struct TwitterAccount {
     }
     
     var account: SignalProducer<AccountStatus, NoError> {
-        if let token = token {
-            return SignalProducer(value: AccountStatus.authorized(token))
-        } else {
-            return getTokenRequestSignalProducer()
-                .flatMapError { _ in
-                    return SignalProducer<String, NoError>(value: "")
-                }
-                .map { token in
-                    token.isEmpty ? AccountStatus.unavailable : AccountStatus.authorized(token)
-            }
-        }
-    }
-    
-    var isAuthorized: SignalProducer<Bool, NoError> {
-        get {
-            return account.map { status in
-                switch status {
-                case .unavailable: return false
-                case .authorized: return true
-                }
+        return SignalProducer<AccountStatus, NoError> { observer, _ in
+            if let token = self.token {
+                observer.send(value: AccountStatus.authorized(token))
+                observer.sendCompleted()
+            } else {
+                self.getTokenRequestSignalProducer()
+                    .flatMapError { _ in
+                        return SignalProducer<String, NoError>(value: "")
+                    }
+                    .map { token -> TwitterAccount.AccountStatus in
+                        guard !token.isEmpty else {
+                            self.token = token
+                            return AccountStatus.unavailable
+                        }
+                        return AccountStatus.authorized(token)
+                    }
+                    .startWithValues { value in
+                        observer.send(value: value)
+                        observer.sendCompleted()
+                    }
             }
         }
     }
@@ -75,7 +75,7 @@ struct TwitterAccount {
     
     func getTokenRequestSignalProducer() -> SignalProducer<String, NetworkError> {
         var headers: HTTPHeaders = ["Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"]
-        if let authorizationHeader = authorizationHeader(user: TwitterAccount.key, password: TwitterAccount.secret) {
+        if let authorizationHeader = authorizationHeader(user: TwitterAccount.shared.key, password: TwitterAccount.shared.secret) {
             headers[authorizationHeader.key] = authorizationHeader.value
         }
         guard let request = TwitterAPI.createRequest(URL(string: "https://api.twitter.com/oauth2/token"),
@@ -86,6 +86,7 @@ struct TwitterAccount {
                                                             observer.send(error: NetworkError.invalidUrl)
                                                         }
         }
+        print(request)
         return TwitterAPI.performRequest(by: request)
     }
     

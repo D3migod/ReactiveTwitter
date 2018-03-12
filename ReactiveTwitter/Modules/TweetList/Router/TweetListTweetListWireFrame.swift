@@ -7,8 +7,11 @@
 //
 
 import UIKit
+import ReactiveSwift
+import Result
 
 class TweetListWireFrame: TweetListWireFrameProtocol {
+    
     struct StoryboardIdentifiers {
         static let main = "Main"
     }
@@ -17,15 +20,15 @@ class TweetListWireFrame: TweetListWireFrameProtocol {
         static let tweetListNavigation = "TweetListNavigationViewController"
     }
     
-    class func createConnections() -> UIViewController {
+    class func createConnections(account: SignalProducer<TwitterAccount.AccountStatus, NoError>) -> UIViewController {
         let wireFrame = TweetListWireFrame()
         let localDataManager: TweetListLocalDataManagerProtocol = TweetListLocalDataManager()
         let remoteDataManager: TweetListRemoteDataManagerProtocol =
-            TweetListRemoteDataManager(account: TwitterAccount.shared.account)
+            TweetListRemoteDataManager(account: account)
         let interactor: TweetListInteractorProtocol =
             TweetListInteractor(localDatamanager: localDataManager,
                                 remoteDatamanager: remoteDataManager,
-                                account: TwitterAccount.shared.isAuthorized)
+                                account: account)
         let presenter: TweetListPresenterProtocol =
             TweetListPresenter(interactor: interactor,
                                wireFrame: wireFrame)

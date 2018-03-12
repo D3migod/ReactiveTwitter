@@ -15,14 +15,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     let testing = NSClassFromString("XCTest") != nil
+    let account = TwitterAccount().account
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        TwitterAccount.set(key: "R7DxgkHrZx6jn6oNDDGdaChAU",
+        TwitterAccount.shared.set(key: "R7DxgkHrZx6jn6oNDDGdaChAU",
                            secret: "sVszTxLLjm1CCLHt3u3FssMc5YZlYSksQjlPLWD59TM0wMWbbQ")
         
         if !testing {
             window = UIWindow(frame: UIScreen.main.bounds)
-            window?.rootViewController = TweetListWireFrame.createConnections()
+            window?.rootViewController = TweetListWireFrame.createConnections(account: account)
             window?.makeKeyAndVisible()
         }
         return true

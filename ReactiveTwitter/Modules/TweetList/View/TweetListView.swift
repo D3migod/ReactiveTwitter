@@ -45,20 +45,26 @@ class TweetListView: UIViewController, TweetListViewProtocol {
     }
     
     func bindUI() {
-        tableView.reactive.reloadData <~ presenter.tweets.producer.map { _ in }
-        messageView.reactive.isHidden <~ presenter.loggedIn.producer
-        
         let (prefetchSignal, prefetchObserver) = Signal<[Int], NoError>.pipe()
         self.prefetchSignal = prefetchSignal
         self.prefetchObserver = prefetchObserver
         
+        tableView.reactive.reloadData <~ presenter.tweets.producer
+            .combineLatest(with: prefetchSignal)
+            .filter { $0.1.isEmpty }
+            .map { _ in }
         Signal
             .combineLatest(prefetchSignal, searchBar.reactive.continuousTextValues.throttle(0.5, on: QueueScheduler.main))
-            .combinePrevious()
+            .combinePrevious(([], nil))
             .map { value -> ([Int], String?) in
                 let (previousValue, currentValue) = value
                 return previousValue.1 != currentValue.1 ? ([], currentValue.1) : currentValue
-        }.observe(presenter.prefetchObserver)
+            }
+            .logEvents()
+            .observe(presenter.prefetchObserver)
+        prefetchObserver.send(value: [])
+        
+        messageView.reactive.isHidden <~ presenter.loggedIn.producer
     }
 }
 

@@ -28,7 +28,7 @@ class Tweet: NSManagedObject, Decodable {
     
     required convenience init(from decoder: Decoder) throws {
         guard let context = decoder.userInfo[.context] as? NSManagedObjectContext else { fatalError() }
-        guard let entity = NSEntityDescription.entity(forEntityName: "Tweet", in: context) else { fatalError() }
+        guard let entity = NSEntityDescription.entity(forEntityName: String(describing: Tweet.self), in: context) else { fatalError() }
         self.init(entity: entity, insertInto: nil)
         
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -61,7 +61,7 @@ extension Tweet {
         }
         required convenience init(from decoder: Decoder) throws {
             guard let context = decoder.userInfo[.context] as? NSManagedObjectContext else { fatalError() }
-            guard let entity = NSEntityDescription.entity(forEntityName: "Hashtag", in: context) else { fatalError() }
+            guard let entity = NSEntityDescription.entity(forEntityName: String(describing: Hashtag.self), in: context) else { fatalError() }
             self.init(entity: entity, insertInto: nil)
             
             let values = try decoder.container(keyedBy: CodingKeys.self)

@@ -17,6 +17,7 @@ class TweetListPresenter: TweetListPresenterProtocol {
     fileprivate static let defaultPageSize = 10
     
     var prefetchObserver: Signal<([Int], String?), NoError>.Observer!
+    var prefetchSignalFromView: Signal<([Int], String?), NoError>!
     
     var prefetchSignal: Signal<Query, NoError>!
     
@@ -68,11 +69,12 @@ class TweetListPresenter: TweetListPresenterProtocol {
             }
             .skipNil()
         
-        let (prefetchSignal, prefetchObserver) = Signal<([Int], String?), NoError>.pipe()
+        let (prefetchSignalFromView, prefetchObserver) = Signal<([Int], String?), NoError>.pipe()
+        self.prefetchSignalFromView = prefetchSignalFromView
         self.prefetchSignal = Signal.combineLatest(
-            prefetchSignal,
-            tweets.signal,
-            minId.signal)
+            self.prefetchSignalFromView.logEvents(),
+            tweets.signal.logEvents(),
+            minId.signal.logEvents())
             .map { (prefetchQuery, tweets, minId) -> Query? in
                 let (indices, hashtag) = prefetchQuery
                 guard let unwrappedHashtag = hashtag else { return nil }
@@ -94,9 +96,12 @@ class TweetListPresenter: TweetListPresenterProtocol {
             tweets.producer,
             SignalProducer(prefetchSignal))
             .map { newTweets, currentTweets, lastQuery in
-                let indices = lastQuery.0
+                let indices = lastQuery.1
                 return indices.count == 0 ? newTweets : currentTweets + newTweets // TODO: Handle tweet update
         }
+        
+        minId.value = 0
+        tweets.value = []
         
         self.prefetchObserver = prefetchObserver
         

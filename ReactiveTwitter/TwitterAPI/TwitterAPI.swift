@@ -76,9 +76,10 @@ struct TwitterAPI: TwitterAPIProtcol {
             .data(with: request)
             .retry(upTo: 2)
             .mapError { _ in NetworkError.failed }
-            .flatMap(.merge) { data, _  -> SignalProducer<T, NetworkError> in
+            .flatMap(.latest) { data, _  -> SignalProducer<T, NetworkError> in
                 return SignalProducer<T, NetworkError> { observer, _ in
                     guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? T, let result = json else {
+                        print(data)
                         observer.send(error: NetworkError.failed)
                         return
                     }

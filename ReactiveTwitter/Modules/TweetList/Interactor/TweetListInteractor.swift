@@ -27,8 +27,13 @@ class TweetListInteractor: TweetListInteractorProtocol {
     
     init(localDatamanager: TweetListLocalDataManagerProtocol,
          remoteDatamanager: TweetListRemoteDataManagerProtocol,
-         account: SignalProducer<Bool, NoError>) {
-        self.account = account
+         account: SignalProducer<TwitterAccount.AccountStatus, NoError>) {
+        self.account = account.map { status in
+            switch status {
+            case .unavailable: return false
+            case .authorized: return true
+            }
+        }
         self.localDatamanager = localDatamanager
         self.remoteDatamanager = remoteDatamanager
         
@@ -53,7 +58,7 @@ class TweetListInteractor: TweetListInteractorProtocol {
                     return
                 }
                 guard tweets.count > 0 else {
-                    print("No tweets count")
+                    print("No tweets")
                     return
                 }
                 tweetsObserver.send(value: tweets)

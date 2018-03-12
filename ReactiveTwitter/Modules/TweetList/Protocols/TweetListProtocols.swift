@@ -15,7 +15,7 @@ protocol TweetListViewProtocol: class {
 }
 
 protocol TweetListWireFrameProtocol: class {
-    static func createConnections() -> UIViewController
+    static func createConnections(account: SignalProducer<TwitterAccount.AccountStatus, NoError>) -> UIViewController
 }
 
 protocol TweetListPresenterProtocol: class {
