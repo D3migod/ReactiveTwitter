@@ -34,6 +34,7 @@
 		168F54192051390700A4F01A /* TweetsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168F54182051390700A4F01A /* TweetsData.swift */; };
 		169BB0CB205169CB002E153E /* UIStoryboard+InstantiateViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169BB0CA205169CB002E153E /* UIStoryboard+InstantiateViewController.swift */; };
 		169BB0CD2051C9AC002E153E /* CoreDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169BB0CC2051C9AC002E153E /* CoreDataStore.swift */; };
+		16E13E0A20587F59009ECD09 /* SearchResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E13E0920587F59009ECD09 /* SearchResponse.swift */; };
 		16E16C96204DC49D00EDF996 /* TweetTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E16C95204DC49D00EDF996 /* TweetTableViewCell.swift */; };
 		16E16C98204DC87800EDF996 /* UIImageView+loadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E16C97204DC87800EDF996 /* UIImageView+loadImage.swift */; };
 		16E16C9A204DCACA00EDF996 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E16C99204DCACA00EDF996 /* ImageCache.swift */; };
@@ -95,6 +96,7 @@
 		168F54182051390700A4F01A /* TweetsData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweetsData.swift; sourceTree = "<group>"; };
 		169BB0CA205169CB002E153E /* UIStoryboard+InstantiateViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIStoryboard+InstantiateViewController.swift"; sourceTree = "<group>"; };
 		169BB0CC2051C9AC002E153E /* CoreDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStore.swift; sourceTree = "<group>"; };
+		16E13E0920587F59009ECD09 /* SearchResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResponse.swift; sourceTree = "<group>"; };
 		16E16C95204DC49D00EDF996 /* TweetTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweetTableViewCell.swift; sourceTree = "<group>"; };
 		16E16C97204DC87800EDF996 /* UIImageView+loadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+loadImage.swift"; sourceTree = "<group>"; };
 		16E16C99204DCACA00EDF996 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
@@ -211,6 +213,7 @@
 				03CFAE10204D335F00E45B48 /* Tweet.swift */,
 				03CFAE14204D3DD200E45B48 /* TweetListCursor.swift */,
 				03DED2CE2057E7E700090CC0 /* Token.swift */,
+				16E13E0920587F59009ECD09 /* SearchResponse.swift */,
 			);
 			path = Entitites;
 			sourceTree = "<group>";
@@ -679,6 +682,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				03CFAE2F204D82EA00E45B48 /* TweetListPresenter.swift in Sources */,
+				16E13E0A20587F59009ECD09 /* SearchResponse.swift in Sources */,
 				03CFAE17204D3FD200E45B48 /* TweetListLocalDataManager.swift in Sources */,
 				03CFADE1204D2A7C00E45B48 /* ReactiveTwitter.xcdatamodeld in Sources */,
 				03CFAE19204D3FEE00E45B48 /* TweetListRemoteDataManager.swift in Sources */,

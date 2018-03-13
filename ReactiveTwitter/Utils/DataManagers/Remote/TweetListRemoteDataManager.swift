@@ -67,11 +67,11 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
                 let context = CoreDataStore.managedObjectContext
                 let decoder = JSONDecoder()
                 decoder.userInfo[.context] = context
-                guard let result = try? decoder.decode([String: [Tweet]].self, from: data) else {
+                guard let result = try? decoder.decode(SearchResponse.self, from: data) else {
                     print(String(data: data, encoding: .utf8) ?? "Empty data")
                     return nil
                 }
-                return result["statuses"]
+                return result.statuses
             }
         
         return tweetsProducer

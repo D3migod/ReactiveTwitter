@@ -21,7 +21,9 @@ enum HTTPRequestMethod: String {
 }
 
 enum NetworkError: Error {
+    case invalidToken
     case invalidUrl
+    case serverFailed
     case failed
 }
 
@@ -63,31 +65,52 @@ struct TwitterAPI: TwitterAPIProtcol {
     
     
     // MARK: - generic request to send an SLRequest
-    static private func request<T: Decodable>(_ token: AccessToken, address: Address, parameters: [String: String] = [:]) -> SignalProducer<T, NetworkError> {
+    static private func request(_ token: AccessToken, address: Address, parameters: [String: String] = [:]) -> SignalProducer<Data, NetworkError> {
         guard let request = createAuthorizedRequest(token, address: address, parameters: parameters) else {
-            return SignalProducer<T, NetworkError> { observer, _ in
+            return SignalProducer<Data, NetworkError> { observer, _ in
                 observer.send(error: NetworkError.invalidUrl)
             }
         }
         return performRequest(by: request)
     }
     
-    static func performRequest<T: Decodable>(by request: URLRequest) -> SignalProducer<T, NetworkError> {
+    static func performRequest(by request: URLRequest) -> SignalProducer<Data, NetworkError> {
         return URLSession.shared.reactive
             .data(with: request)
             .retry(upTo: 2)
             .mapError { _ in NetworkError.failed }
-            .flatMap(.latest) { data, _  -> SignalProducer<T, NetworkError> in
-                return SignalProducer<T, NetworkError> { observer, _ in
-                    guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? T, let result = json else {
-                        print(data)
-                        observer.send(error: NetworkError.failed)
+            .flatMap(.latest) { data, response  -> SignalProducer<Data, NetworkError> in
+                return SignalProducer<Data, NetworkError> { observer, _ in
+                    guard let httpResponse = response as? HTTPURLResponse else {
+                        observer.send(error: .failed)
                         return
                     }
-                    observer.send(value: result)
-                    observer.sendCompleted()
+//                    print(String(data: data, encoding: .utf8) ?? "No data")
+                    if 200 ..< 300 ~= httpResponse.statusCode {
+                        observer.send(value: data)
+                        observer.sendCompleted()
+                        return
+                    } else if 400 == httpResponse.statusCode {
+                        observer.send(error: .invalidToken)
+                        return
+                    } else if 401 ..< 500 ~= httpResponse.statusCode {
+                        observer.send(error: .failed)
+                        return
+                    } else {
+                        observer.send(error: .serverFailed)
+                        return
+                    }
                 }
-        }
+            }
+            .on(failed: { error in
+                switch error {
+                case .invalidToken:
+                    TwitterAccount.shared.token = nil
+                    TwitterAccount.shared.account.start()
+                default:
+                    break
+                }
+            })
     }
     
     static private func createAuthorizedRequest(_ token: AccessToken, address: Address, parameters: HTTPParameters = [:]) -> URLRequest? {
