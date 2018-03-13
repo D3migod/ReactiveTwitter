@@ -72,9 +72,9 @@ class TweetListPresenter: TweetListPresenterProtocol {
         let (prefetchSignalFromView, prefetchObserver) = Signal<([Int], String?), NoError>.pipe()
         self.prefetchSignalFromView = prefetchSignalFromView
         self.prefetchSignal = Signal.combineLatest(
-            self.prefetchSignalFromView.logEvents(),
-            tweets.signal.logEvents(),
-            minId.signal.logEvents())
+            self.prefetchSignalFromView,
+            tweets.signal,
+            minId.signal)
             .map { (prefetchQuery, tweets, minId) -> Query? in
                 let (indices, hashtag) = prefetchQuery
                 guard let unwrappedHashtag = hashtag else { return nil }

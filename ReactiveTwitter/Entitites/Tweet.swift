@@ -37,6 +37,7 @@ class Tweet: NSManagedObject, Decodable {
         name = try values.decode(String.self, forKey: .name)
         created = try values.decode(Date.self, forKey: .created)
         imageUrl = try values.decode(String.self, forKey: .imageUrl)
+        hashtags = try values.decode([Hashtag].self, forKey: .hashtags)
     }
 }
 

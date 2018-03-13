@@ -49,26 +49,35 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
             }
         
         // timer that emits a reachable logged account
-        let reachableTimerWithAccount = SignalProducer.combineLatest(
+        let reachableTimerWithAccount: SignalProducer<AccessToken?, NoError> = SignalProducer.combineLatest(
             Reachability.isConnected(),
             currentAccount,
             paused.producer)
             .map { reachable, account, paused in
-            return (reachable && !paused) ? account : nil
+                return (reachable && !paused) ? account : nil
             }
-            .filter { $0 != nil }
-            .map { $0! }
+        
         
         // Re-fetch the feed
-        let tweetsProducer = reachableTimerWithAccount
-            .flatMap(.latest) { token in
-                jsonProvider(token)
+        let tweetsProducer: SignalProducer<[Tweet]?, NetworkError> = reachableTimerWithAccount
+            .skipNil()
+            .flatMap(.latest, jsonProvider)
+            .observe(on: QueueScheduler.main)
+            .map { data -> [Tweet]? in
+                let context = CoreDataStore.managedObjectContext
+                let decoder = JSONDecoder()
+                decoder.userInfo[.context] = context
+                guard let result = try? decoder.decode([String: [Tweet]].self, from: data) else {
+                    print(String(data: data, encoding: .utf8) ?? "Empty data")
+                    return nil
+                }
+                return result["statuses"]
             }
-            .flatMapError  { _ in SignalProducer<Data, NoError>.empty }
-            .map { value in
-                try! JSONDecoder().decode([Tweet].self, from: value)
-        }
         
         return tweetsProducer
+            .skipNil()
+            .flatMapError({ (_) -> SignalProducer<[Tweet], NoError> in
+                SignalProducer.empty
+            })
     }
 }

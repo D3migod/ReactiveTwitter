@@ -45,9 +45,13 @@ public class KeyChain {
         SecItemDelete(query as CFDictionary)
     }
     
+    public static func deleteValue(for key: String) {
+        delete(key: key)
+    }
+    
     public static func store(_ value: String?, key: String) {
         guard let data = value?.data(using: .utf8) else {
-            KeyChain.delete(key: key)
+            delete(key: key)
             return
         }
         let _ = KeyChain.save(key: key, data: data)

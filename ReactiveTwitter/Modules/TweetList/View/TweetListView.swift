@@ -60,7 +60,6 @@ class TweetListView: UIViewController, TweetListViewProtocol {
                 let (previousValue, currentValue) = value
                 return previousValue.1 != currentValue.1 ? ([], currentValue.1) : currentValue
             }
-            .logEvents()
             .observe(presenter.prefetchObserver)
         prefetchObserver.send(value: [])
         
@@ -72,7 +71,7 @@ extension TweetListView: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TweetCell", for: indexPath) as! TweetTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: TweetTableViewCell.self), for: indexPath) as! TweetTableViewCell
         
         cell.update(with: presenter.tweets.value[indexPath.row])
         

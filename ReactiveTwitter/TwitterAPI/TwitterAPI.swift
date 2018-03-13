@@ -31,6 +31,7 @@ protocol TwitterAPIProtcol {
 
 struct TwitterAPI: TwitterAPIProtcol {
     
+    
     fileprivate enum Address: String {
         case search = "search/tweets.json"
         
@@ -44,7 +45,7 @@ struct TwitterAPI: TwitterAPIProtcol {
     static func getTweetList(for query: Query) -> (AccessToken) -> SignalProducer<Data, NetworkError> {
         let ((minId, maxId, count), hashtag) = query
         return { account in
-            var parameters = ["q": "%23\(hashtag)",
+            var parameters = ["q": "#\(hashtag)",
                 "result_type": "mixed",
                 "count": String(count),
                 "include_entities": "true"]
@@ -62,7 +63,7 @@ struct TwitterAPI: TwitterAPIProtcol {
     
     
     // MARK: - generic request to send an SLRequest
-    static private func request<T: Any>(_ token: AccessToken, address: Address, parameters: [String: String] = [:]) -> SignalProducer<T, NetworkError> {
+    static private func request<T: Decodable>(_ token: AccessToken, address: Address, parameters: [String: String] = [:]) -> SignalProducer<T, NetworkError> {
         guard let request = createAuthorizedRequest(token, address: address, parameters: parameters) else {
             return SignalProducer<T, NetworkError> { observer, _ in
                 observer.send(error: NetworkError.invalidUrl)
@@ -71,7 +72,7 @@ struct TwitterAPI: TwitterAPIProtcol {
         return performRequest(by: request)
     }
     
-    static func performRequest<T: Any>(by request: URLRequest) -> SignalProducer<T, NetworkError> {
+    static func performRequest<T: Decodable>(by request: URLRequest) -> SignalProducer<T, NetworkError> {
         return URLSession.shared.reactive
             .data(with: request)
             .retry(upTo: 2)
@@ -90,22 +91,28 @@ struct TwitterAPI: TwitterAPIProtcol {
     }
     
     static private func createAuthorizedRequest(_ token: AccessToken, address: Address, parameters: HTTPParameters = [:]) -> URLRequest? {
-        return createRequest(address.url, parameters: parameters, headers: ["Bearer \(token)": "Authorization"])
+        return createRequest(address.url, parameters: parameters, headers: ["Authorization": "Bearer \(token)"])
     }
     
-    static func createRequest(_ url: URL?, parameters: HTTPParameters, headers: HTTPHeaders, method: HTTPRequestMethod = .get) -> URLRequest? {
+    static func createRequest(_ url: URL?, parameters: HTTPParameters? = nil, bodyParameters: String? = nil, headers: HTTPHeaders, method: HTTPRequestMethod = .get) -> URLRequest? {
         guard let unwrappedUrl = url, var comps = URLComponents(string: unwrappedUrl.absoluteString) else {
             print("Incorrect url \(String(describing: url))")
             return nil
         }
-        comps.queryItems = parameters.map(URLQueryItem.init)
+        if let parameters = parameters {
+            comps.queryItems = parameters.map(URLQueryItem.init)
+        }
         guard let compsUrl = comps.url else {
-            print("Incorrect parameters \(parameters)")
+            print("Incorrect parameters \(parameters ?? [:]) or url \(unwrappedUrl)")
             return nil
         }
+        
         var request = URLRequest(url: compsUrl)
+        if let bodyParameters = bodyParameters {
+            request.httpBody = bodyParameters.data(using: .utf8)
+        }
         request.httpMethod = method.rawValue
-        headers.forEach({request.setValue($0.0, forHTTPHeaderField: $0.1)})
+        headers.forEach({request.setValue($0.1, forHTTPHeaderField: $0.0)})
         return request
     }
 }
