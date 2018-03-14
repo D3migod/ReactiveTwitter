@@ -16,6 +16,8 @@ class TweetListPresenter: TweetListPresenterProtocol {
     
     fileprivate static let defaultPageSize = 10
     
+    fileprivate static let fetchThreshold = 5
+    
     var prefetchObserver: Signal<([Int], String?), NoError>.Observer!
     var prefetchSignalFromView: Signal<([Int], String?), NoError>!
     
@@ -24,13 +26,6 @@ class TweetListPresenter: TweetListPresenterProtocol {
     var interactor: TweetListInteractorProtocol!
     
     var wireFrame: TweetListWireFrameProtocol!
-    
-    // MARK: - Input
-    var paused: Bool = false {
-        didSet {
-            interactor.paused.value = paused
-        }
-    }
     
     // MARK: - Output
     var tweets: MutableProperty<[Tweet]>! //private(set)
@@ -54,16 +49,18 @@ class TweetListPresenter: TweetListPresenterProtocol {
         loggedIn <~ interactor.account
         
         maxId <~ interactor.tweetsSignal
-            .combineLatest(with: maxId.signal)
-            .map { newTweets, currentMax -> (Int64?) in
+            .map { [weak self] newTweets -> (Int64?) in
+                guard let strongSelf = self else { return nil }
+                let currentMax = strongSelf.maxId.value
                 guard let receivedMax = newTweets.map({$0.id}).max() else { return nil }
                 return receivedMax > currentMax ? receivedMax : nil
             }
             .skipNil()
         
         minId <~ interactor.tweetsSignal
-            .combineLatest(with: maxId.signal)
-            .map { newTweets, currentMin -> (Int64?) in
+            .map { [weak self] newTweets -> (Int64?) in
+                guard let strongSelf = self else { return nil }
+                let currentMin = strongSelf.minId.value
                 guard let receivedMin = newTweets.map({$0.id}).min() else { return nil }
                 return receivedMin < currentMin ? receivedMin : nil
             }
@@ -71,11 +68,16 @@ class TweetListPresenter: TweetListPresenterProtocol {
         
         let (prefetchSignalFromView, prefetchObserver) = Signal<([Int], String?), NoError>.pipe()
         self.prefetchSignalFromView = prefetchSignalFromView
-        self.prefetchSignal = Signal.combineLatest(
-            self.prefetchSignalFromView,
-            tweets.signal,
-            minId.signal)
-            .map { (prefetchQuery, tweets, minId) -> Query? in
+            .filter { [weak self] prefetchQuery in
+                guard let strongSelf = self else { return false }
+                guard let maxIndex = prefetchQuery.0.max() else { return true }
+                return strongSelf.tweets.value.count - (maxIndex + 1) < TweetListPresenter.fetchThreshold
+            }
+        self.prefetchSignal = self.prefetchSignalFromView
+            .map { [weak self] (prefetchQuery) -> Query? in
+                guard let strongSelf = self else { return nil }
+                let tweets = strongSelf.tweets.value
+                let minId = strongSelf.minId.value
                 let (indices, hashtag) = prefetchQuery
                 guard let unwrappedHashtag = hashtag else { return nil }
                 if indices.isEmpty {
@@ -93,12 +95,15 @@ class TweetListPresenter: TweetListPresenterProtocol {
         // Subscribe to interactor changes of tweets (in local database)
         tweets <~ SignalProducer.combineLatest(
             interactor.tweetsSignal,
-            tweets.producer,
-            SignalProducer(prefetchSignal))
-            .map { newTweets, currentTweets, lastQuery in
-                let indices = lastQuery.1
-                return indices.count == 0 ? newTweets : currentTweets + newTweets // TODO: Handle tweet update
-        }
+            SignalProducer(self.prefetchSignalFromView))
+            .map { [weak self] newTweets, lastQuery -> [Tweet]? in
+                guard let strongSelf = self else { return nil}
+                let currentTweets = strongSelf.tweets.value
+                let indices = lastQuery.0
+                
+                return indices.isEmpty ? newTweets : Array(Set(currentTweets).union(Set(newTweets))) // TODO: Handle insert in the middle
+            }
+            .skipNil()
         
         minId.value = 0
         tweets.value = []

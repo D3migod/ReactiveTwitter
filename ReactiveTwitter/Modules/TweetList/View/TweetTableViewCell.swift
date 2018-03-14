@@ -17,7 +17,7 @@ class TweetTableViewCell: UITableViewCell {
     func update(with tweet: Tweet) {
         name.text = tweet.name
         message.text = tweet.text
-        photo.setImage(URL(string: tweet.imageUrl), stopLoadingSignal: prepareForReuseSignal())
+        photo.setImage(URL(string: tweet.imageUrl), stopLoadingSignal: reactive.prepareForReuse)
         
     }
     

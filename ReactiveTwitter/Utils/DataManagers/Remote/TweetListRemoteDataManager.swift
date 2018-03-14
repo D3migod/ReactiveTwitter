@@ -16,9 +16,6 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
     
     private let hashtagQuery = MutableProperty<String>("")
     
-    // MARK: input
-    let paused = MutableProperty<Bool>(false)
-    
     // MARK: output
     var getTweetsAction: Action<Query, [Tweet], NoError>!
     
@@ -29,7 +26,6 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
     }
     
     
-    // TODO: Change to action
     private func createDataProvider(account: SignalProducer<TwitterAccount.AccountStatus, NoError>,
          jsonProvider: @escaping (AccessToken) -> SignalProducer<Data, NetworkError>) -> SignalProducer<[Tweet], NoError> {
 
@@ -47,14 +43,13 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
                 default: fatalError()
                 }
             }
-        
+        let logEvents: Set<LoggingEvent.SignalProducer> = [.started, .completed]
         // timer that emits a reachable logged account
         let reachableTimerWithAccount: SignalProducer<AccessToken?, NoError> = SignalProducer.combineLatest(
-            Reachability.isConnected(),
-            currentAccount,
-            paused.producer)
-            .map { reachable, account, paused in
-                return (reachable && !paused) ? account : nil
+            Reachability.isConnected().logEvents(events: logEvents),
+            currentAccount.logEvents(events: logEvents))
+            .map { reachable, account in
+                return reachable ? account : nil
             }
         
         

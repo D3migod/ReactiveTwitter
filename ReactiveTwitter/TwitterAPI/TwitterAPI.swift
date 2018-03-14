@@ -85,7 +85,6 @@ struct TwitterAPI: TwitterAPIProtcol {
                         observer.send(error: .failed)
                         return
                     }
-//                    print(String(data: data, encoding: .utf8) ?? "No data")
                     if 200 ..< 300 ~= httpResponse.statusCode {
                         observer.send(value: data)
                         observer.sendCompleted()
@@ -94,6 +93,7 @@ struct TwitterAPI: TwitterAPIProtcol {
                         observer.send(error: .invalidToken)
                         return
                     } else if 401 ..< 500 ~= httpResponse.statusCode {
+                        print(String(data: data, encoding: .utf8) ?? "No data")
                         observer.send(error: .failed)
                         return
                     } else {

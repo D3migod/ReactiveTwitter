@@ -17,8 +17,6 @@ class TweetListInteractor: TweetListInteractorProtocol {
     
     var remoteDatamanager: TweetListRemoteDataManagerProtocol!
     
-    var paused: MutableProperty<Bool>!
-    
     var tweetsSignal: Signal<[Tweet], NoError>!
     
     var tweetsObserver: Signal<[Tweet], NoError>.Observer!

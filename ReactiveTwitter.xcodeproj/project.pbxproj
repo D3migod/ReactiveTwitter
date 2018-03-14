@@ -38,7 +38,6 @@
 		16E16C96204DC49D00EDF996 /* TweetTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E16C95204DC49D00EDF996 /* TweetTableViewCell.swift */; };
 		16E16C98204DC87800EDF996 /* UIImageView+loadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E16C97204DC87800EDF996 /* UIImageView+loadImage.swift */; };
 		16E16C9A204DCACA00EDF996 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E16C99204DCACA00EDF996 /* ImageCache.swift */; };
-		16E16C9C204DCF4F00EDF996 /* UITableViewCell+prepareForReuse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E16C9B204DCF4F00EDF996 /* UITableViewCell+prepareForReuse.swift */; };
 		31ED32F3AE8E489B36B65BE5 /* Pods_ReactiveTwitterTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5A200F371494BDBDB95D1B4 /* Pods_ReactiveTwitterTests.framework */; };
 		7367CA08CC3F724A81279A1B /* Pods_ReactiveTwitterUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A2ED84C703A02E32820E7C8 /* Pods_ReactiveTwitterUITests.framework */; };
 		B0B77761F70B9C5302A04842 /* Pods_ReactiveTwitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E302424DAA9433C23DAB5D39 /* Pods_ReactiveTwitter.framework */; };
@@ -100,7 +99,6 @@
 		16E16C95204DC49D00EDF996 /* TweetTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweetTableViewCell.swift; sourceTree = "<group>"; };
 		16E16C97204DC87800EDF996 /* UIImageView+loadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+loadImage.swift"; sourceTree = "<group>"; };
 		16E16C99204DCACA00EDF996 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
-		16E16C9B204DCF4F00EDF996 /* UITableViewCell+prepareForReuse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableViewCell+prepareForReuse.swift"; sourceTree = "<group>"; };
 		5A2ED84C703A02E32820E7C8 /* Pods_ReactiveTwitterUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ReactiveTwitterUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8DF5F4461F422D5285EF381F /* Pods-ReactiveTwitterTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveTwitterTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ReactiveTwitterTests/Pods-ReactiveTwitterTests.debug.xcconfig"; sourceTree = "<group>"; };
 		A664BDF787A52E759B0AF6EB /* Pods-ReactiveTwitterUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveTwitterUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ReactiveTwitterUITests/Pods-ReactiveTwitterUITests.release.xcconfig"; sourceTree = "<group>"; };
@@ -326,7 +324,6 @@
 		03CFAE38204ECCF600E45B48 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				16E16C9B204DCF4F00EDF996 /* UITableViewCell+prepareForReuse.swift */,
 				16E16C97204DC87800EDF996 /* UIImageView+loadImage.swift */,
 				169BB0CA205169CB002E153E /* UIStoryboard+InstantiateViewController.swift */,
 				16815B2E20533E07002DE66F /* CodingUserInfoKey+context.swift */,
@@ -692,7 +689,6 @@
 				03CFADD9204D2A7C00E45B48 /* AppDelegate.swift in Sources */,
 				03CFAE35204D855700E45B48 /* TweetListProtocols.swift in Sources */,
 				03CFAE33204D830800E45B48 /* TweetListView.swift in Sources */,
-				16E16C9C204DCF4F00EDF996 /* UITableViewCell+prepareForReuse.swift in Sources */,
 				16E16C98204DC87800EDF996 /* UIImageView+loadImage.swift in Sources */,
 				03CFAE37204EA9F900E45B48 /* TwitterAccount.swift in Sources */,
 				03CFAE11204D335F00E45B48 /* Tweet.swift in Sources */,

@@ -50,8 +50,6 @@ class TweetListView: UIViewController, TweetListViewProtocol {
         self.prefetchObserver = prefetchObserver
         
         tableView.reactive.reloadData <~ presenter.tweets.producer
-            .combineLatest(with: prefetchSignal)
-            .filter { $0.1.isEmpty }
             .map { _ in }
         Signal
             .combineLatest(prefetchSignal, searchBar.reactive.continuousTextValues.throttle(0.5, on: QueueScheduler.main))
