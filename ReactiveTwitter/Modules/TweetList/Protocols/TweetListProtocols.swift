@@ -35,7 +35,7 @@ protocol TweetListInteractorProtocol: class {
     var prefetchObserver: Signal<Query, NoError>.Observer! { get }
     
     // INTERACTOR -> Presenter
-    var tweetsSignal: Signal<[Tweet], NoError>! { get }
+    var tweetsSignal: Signal<([Tweet], Query), NoError>! { get }
     var account: SignalProducer<Bool, NoError>! { get set }
 }
 

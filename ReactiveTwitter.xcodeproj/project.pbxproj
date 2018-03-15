@@ -28,6 +28,7 @@
 		03CFAE37204EA9F900E45B48 /* TwitterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFAE36204EA9F900E45B48 /* TwitterAccount.swift */; };
 		03CFAE3B204ECD2500E45B48 /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFAE3A204ECD2500E45B48 /* KeyChain.swift */; };
 		03DED2CF2057E7E700090CC0 /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03DED2CE2057E7E700090CC0 /* Token.swift */; };
+		16041D6A205B185A00F49907 /* UIViewController+hideKeyboardOnTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16041D69205B185A00F49907 /* UIViewController+hideKeyboardOnTap.swift */; };
 		16815B2F20533E07002DE66F /* CodingUserInfoKey+context.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16815B2E20533E07002DE66F /* CodingUserInfoKey+context.swift */; };
 		168F5414205076C500A4F01A /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168F5413205076C500A4F01A /* Reachability.swift */; };
 		168F541620512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168F541520512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift */; };
@@ -89,6 +90,7 @@
 		03CFAE3A204ECD2500E45B48 /* KeyChain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyChain.swift; sourceTree = "<group>"; };
 		03DED2CE2057E7E700090CC0 /* Token.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
 		08F1F400D2965AEF601B48FF /* Pods-ReactiveTwitterTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveTwitterTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ReactiveTwitterTests/Pods-ReactiveTwitterTests.release.xcconfig"; sourceTree = "<group>"; };
+		16041D69205B185A00F49907 /* UIViewController+hideKeyboardOnTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+hideKeyboardOnTap.swift"; sourceTree = "<group>"; };
 		16815B2E20533E07002DE66F /* CodingUserInfoKey+context.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CodingUserInfoKey+context.swift"; sourceTree = "<group>"; };
 		168F5413205076C500A4F01A /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		168F541520512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweeetListRemoteDataManagerTests.swift; sourceTree = "<group>"; };
@@ -327,6 +329,7 @@
 				16E16C97204DC87800EDF996 /* UIImageView+loadImage.swift */,
 				169BB0CA205169CB002E153E /* UIStoryboard+InstantiateViewController.swift */,
 				16815B2E20533E07002DE66F /* CodingUserInfoKey+context.swift */,
+				16041D69205B185A00F49907 /* UIViewController+hideKeyboardOnTap.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -682,6 +685,7 @@
 				16E13E0A20587F59009ECD09 /* SearchResponse.swift in Sources */,
 				03CFAE17204D3FD200E45B48 /* TweetListLocalDataManager.swift in Sources */,
 				03CFADE1204D2A7C00E45B48 /* ReactiveTwitter.xcdatamodeld in Sources */,
+				16041D6A205B185A00F49907 /* UIViewController+hideKeyboardOnTap.swift in Sources */,
 				03CFAE19204D3FEE00E45B48 /* TweetListRemoteDataManager.swift in Sources */,
 				03CFAE3B204ECD2500E45B48 /* KeyChain.swift in Sources */,
 				16815B2F20533E07002DE66F /* CodingUserInfoKey+context.swift in Sources */,
@@ -871,7 +875,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = EK85WKH69P;
+				DEVELOPMENT_TEAM = KLQXQCYQ3H;
 				INFOPLIST_FILE = ReactiveTwitter/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Bulat.ReactiveTwitter;
@@ -887,7 +891,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = EK85WKH69P;
+				DEVELOPMENT_TEAM = KLQXQCYQ3H;
 				INFOPLIST_FILE = ReactiveTwitter/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Bulat.ReactiveTwitter;

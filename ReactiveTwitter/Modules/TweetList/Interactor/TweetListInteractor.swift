@@ -17,9 +17,9 @@ class TweetListInteractor: TweetListInteractorProtocol {
     
     var remoteDatamanager: TweetListRemoteDataManagerProtocol!
     
-    var tweetsSignal: Signal<[Tweet], NoError>!
+    var tweetsSignal: Signal<([Tweet], Query), NoError>!
     
-    var tweetsObserver: Signal<[Tweet], NoError>.Observer!
+    var tweetsObserver: Signal<([Tweet], Query), NoError>.Observer!
     
     var account: SignalProducer<Bool, NoError>!
     
@@ -35,13 +35,13 @@ class TweetListInteractor: TweetListInteractorProtocol {
         self.localDatamanager = localDatamanager
         self.remoteDatamanager = remoteDatamanager
         
-        let (tweetsSignal, tweetsObserver) = Signal<[Tweet], NoError>.pipe()
+        let (tweetsSignal, tweetsObserver) = Signal<([Tweet], Query), NoError>.pipe()
         self.tweetsSignal = tweetsSignal
         self.tweetsObserver = tweetsObserver
         self.prefetchObserver = Signal<Query, NoError>.Observer(
             value: { query in
                 guard !query.1.isEmpty else {
-                    tweetsObserver.send(value: [])
+                    tweetsObserver.send(value: ([], query))
                     return
                 }
                 Reachability.isConnected().startWithValues({ (isInternetAvailable) in
@@ -50,7 +50,7 @@ class TweetListInteractor: TweetListInteractorProtocol {
                             switch result {
                             case .success(let tweets):
                                 localDatamanager.save(tweets)
-                                tweetsObserver.send(value: tweets)
+                                tweetsObserver.send(value: (tweets, query))
                             case .failure(let error):
                                 print("Remote server error occurred: \(error)")
                                 switch error {
@@ -61,7 +61,7 @@ class TweetListInteractor: TweetListInteractorProtocol {
                                         print("Local database rrror occured")
                                         return
                                     }
-                                    tweetsObserver.send(value: tweets)
+                                    tweetsObserver.send(value: (tweets, query))
                                     return
                                 }
                             }
@@ -71,7 +71,7 @@ class TweetListInteractor: TweetListInteractorProtocol {
                             print("Error occured")
                             return
                         }
-                        tweetsObserver.send(value: tweets)
+                        tweetsObserver.send(value: (tweets, query))
                     }
                 })
         })

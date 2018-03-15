@@ -19,6 +19,7 @@ class TweetListPresenter: TweetListPresenterProtocol {
     fileprivate static let fetchThreshold = 10
     
     var prefetchObserver: Signal<([Int], String?), NoError>.Observer!
+    
     var prefetchSignalFromView: Signal<([Int], String?), NoError>!
     
     var prefetchSignal: Signal<Query, NoError>!
@@ -31,10 +32,6 @@ class TweetListPresenter: TweetListPresenterProtocol {
     var tweets: MutableProperty<[Tweet]>! //private(set)
     
     var loggedIn: MutableProperty<Bool>!
-    
-    var maxId: MutableProperty<Int64>!
-    
-    var minId: MutableProperty<Int64>!
     
     init(interactor: TweetListInteractorProtocol,
          wireFrame: TweetListWireFrameProtocol) {
@@ -55,7 +52,6 @@ class TweetListPresenter: TweetListPresenterProtocol {
             .filter { [weak self] prefetchQuery in
                 guard let strongSelf = self else { return false }
                 guard let maxIndex = prefetchQuery.0.max() else { return true }
-                print(strongSelf.tweets.value.count)
                 return strongSelf.tweets.value.count - (maxIndex + 1) < TweetListPresenter.fetchThreshold
             }
             .logEvents()
@@ -75,19 +71,13 @@ class TweetListPresenter: TweetListPresenterProtocol {
             .skipNil()
         
         // Subscribe to interactor changes of tweets (in local database)
-        tweets <~ SignalProducer.zip(
-            interactor.tweetsSignal,
-            SignalProducer(self.prefetchSignalFromView))
-            .map { [weak self] newTweets, lastQuery -> [Tweet]? in
+        tweets <~ interactor.tweetsSignal
+            .map { [weak self] response -> [Tweet]? in
                 guard let strongSelf = self else { return nil}
+                let (newTweets, _) = response
                 let currentTweets = strongSelf.tweets.value
-                let indices = lastQuery.0
                 let sortedNewTweets = newTweets.sorted(by: { $0.id > $1.id })
-                print(currentTweets.map {$0.id})
-                print(sortedNewTweets.map {$0.id})
-                print(strongSelf.tweets.value.last?.id ?? -1)
-                print(sortedNewTweets.first?.id ?? -1)
-                if indices.isEmpty {
+                if currentTweets.isEmpty {
                     return sortedNewTweets
                 } else if let currentMinId = strongSelf.tweets.value.last?.id, let receivedMaxId = sortedNewTweets.first?.id, currentMinId > receivedMaxId {
                     return currentTweets + sortedNewTweets
