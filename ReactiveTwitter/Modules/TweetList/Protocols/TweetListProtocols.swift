@@ -41,6 +41,7 @@ protocol TweetListInteractorProtocol: class {
 
 protocol TweetListRemoteDataManagerProtocol: class {
     var getTweetsAction: Action<Query, [Tweet], NoError>! { get set }
+    func createDataProvider(jsonProvider: @escaping (AccessToken) -> SignalProducer<Data, NetworkError>) -> SignalProducer<[Tweet], NoError>
 }
 
 

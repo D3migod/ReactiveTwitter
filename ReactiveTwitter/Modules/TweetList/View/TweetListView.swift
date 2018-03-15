@@ -52,8 +52,12 @@ class TweetListView: UIViewController, TweetListViewProtocol {
         self.prefetchObserver = prefetchObserver
         tableView.reactive.reloadData <~ presenter.tweets.producer
             .map { _ in }
-        Signal
-            .combineLatest(prefetchSignal, searchBar.reactive.continuousTextValues.throttle(1.0, on: QueueScheduler.main))
+        // Clear table on empty text field bypassing throttle
+        let emptyInputSignal = searchBar.reactive.continuousTextValues.filter({$0?.isEmpty ?? true}).map { ([Int](), $0) }
+        let nonEmptyInputSignal = Signal
+            .combineLatest(prefetchSignal, searchBar.reactive.continuousTextValues
+                .throttle(0.5, on: QueueScheduler.main)
+                .filter({!($0?.isEmpty ?? true)}))
             .combinePrevious(([], nil))
             .on(value: { [weak self] value in
                 let (previousValue, currentValue) = value
@@ -65,7 +69,9 @@ class TweetListView: UIViewController, TweetListViewProtocol {
                 let (previousValue, currentValue) = value
                 return previousValue.1 != currentValue.1 ? ([], currentValue.1) : currentValue
             }
-            .observe(presenter.prefetchObserver)
+        
+        Signal.merge(emptyInputSignal, nonEmptyInputSignal)
+.observe(presenter.prefetchObserver)
         prefetchObserver.send(value: [])
         
         messageView.reactive.isHidden <~ presenter.loggedIn.producer

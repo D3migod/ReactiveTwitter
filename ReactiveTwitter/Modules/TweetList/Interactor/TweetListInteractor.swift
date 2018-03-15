@@ -19,8 +19,6 @@ class TweetListInteractor: TweetListInteractorProtocol {
     
     var tweetsSignal: Signal<([Tweet], Query), NoError>!
     
-    var tweetsObserver: Signal<([Tweet], Query), NoError>.Observer!
-    
     var account: SignalProducer<Bool, NoError>!
     
     init(localDatamanager: TweetListLocalDataManagerProtocol,
@@ -35,45 +33,30 @@ class TweetListInteractor: TweetListInteractorProtocol {
         self.localDatamanager = localDatamanager
         self.remoteDatamanager = remoteDatamanager
         
-        let (tweetsSignal, tweetsObserver) = Signal<([Tweet], Query), NoError>.pipe()
-        self.tweetsSignal = tweetsSignal
-        self.tweetsObserver = tweetsObserver
-        self.prefetchObserver = Signal<Query, NoError>.Observer(
-            value: { query in
+        let (prefetchSignal, prefetchObserver) = Signal<Query, NoError>.pipe()
+        self.prefetchObserver = prefetchObserver
+        self.tweetsSignal = prefetchSignal
+            .flatMap(FlattenStrategy.latest) { query -> SignalProducer<([Tweet], Query), NoError> in
                 guard !query.1.isEmpty else {
-                    tweetsObserver.send(value: ([], query))
-                    return
+                    return SignalProducer(value: ([], query))
                 }
-                Reachability.isConnected().startWithValues({ (isInternetAvailable) in
-                    if isInternetAvailable {
-                        remoteDatamanager.getTweetsAction.apply(query).startWithResult { (result) in
-                            switch result {
-                            case .success(let tweets):
+                return Reachability.isConnected().flatMap(FlattenStrategy.latest) { isConnected -> SignalProducer<([Tweet], Query), NoError> in
+                    if isConnected {
+                        return remoteDatamanager.createDataProvider(jsonProvider: TwitterAPI.getTweetList(for: query))
+                            .on(value: { tweets in
                                 localDatamanager.save(tweets)
-                                tweetsObserver.send(value: (tweets, query))
-                            case .failure(let error):
-                                print("Remote server error occurred: \(error)")
-                                switch error {
-                                case .disabled:
-                                    return
-                                default:
-                                    guard let tweets = try? localDatamanager.getTweets(for: query) else {
-                                        print("Local database rrror occured")
-                                        return
-                                    }
-                                    tweetsObserver.send(value: (tweets, query))
-                                    return
-                                }
-                            }
+                            })
+                            .map { tweets in
+                                return (tweets, query)
                         }
                     } else {
                         guard let tweets = try? localDatamanager.getTweets(for: query) else {
                             print("Error occured")
-                            return
+                            return SignalProducer.empty
                         }
-                        tweetsObserver.send(value: (tweets, query))
+                        return SignalProducer(value: (tweets, query))
                     }
-                })
-        })
+                }
+        }
     }
 }

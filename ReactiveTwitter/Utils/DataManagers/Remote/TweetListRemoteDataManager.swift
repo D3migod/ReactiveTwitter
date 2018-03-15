@@ -12,22 +12,19 @@ import ReactiveCocoa
 import Result
 
 class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
-    private let feedCursor = MutableProperty<TweetListCursor>(.none)
-    
-    private let hashtagQuery = MutableProperty<String>("")
     
     // MARK: output
     var getTweetsAction: Action<Query, [Tweet], NoError>!
     
+    var account: SignalProducer<TwitterAccount.AccountStatus, NoError>!
+    
+    
     init(account: SignalProducer<TwitterAccount.AccountStatus, NoError>) {
-        getTweetsAction = Action<Query, [Tweet], NoError> { value in
-            return self.createDataProvider(account: account, jsonProvider: TwitterAPI.getTweetList(for: value))
-        }
+        self.account = account
     }
     
     
-    private func createDataProvider(account: SignalProducer<TwitterAccount.AccountStatus, NoError>,
-         jsonProvider: @escaping (AccessToken) -> SignalProducer<Data, NetworkError>) -> SignalProducer<[Tweet], NoError> {
+    func createDataProvider(jsonProvider: @escaping (AccessToken) -> SignalProducer<Data, NetworkError>) -> SignalProducer<[Tweet], NoError> {
 
         let currentAccount: SignalProducer<AccessToken, NoError> = account
             .filter { account in
