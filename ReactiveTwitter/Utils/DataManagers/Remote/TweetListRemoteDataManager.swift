@@ -44,17 +44,16 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
                 }
             }
         // timer that emits a reachable logged account
-        let reachableAccount: SignalProducer<AccessToken?, NoError> = SignalProducer.combineLatest(
-            Reachability.isConnected(),
-            currentAccount)
-            .map { reachable, account in
-                return reachable ? account : nil
-            }
-        
+//        let reachableAccount: SignalProducer<AccessToken?, NoError> = SignalProducer.combineLatest(
+//            Reachability.isConnected(),
+//            currentAccount)
+//            .map { reachable, account in
+//                return reachable ? account : nil
+//            }
+        let reachableAccount = currentAccount
         
         // Re-fetch the feed
-        let tweetsProducer: SignalProducer<[Tweet]?, NetworkError> = reachableAccount
-            .skipNil()
+        let tweetsProducer: SignalProducer<[Tweet]?, NetworkError> = reachableAccount //.skipNil()
             .flatMap(.latest, jsonProvider)
             .observe(on: QueueScheduler.main)
             .map { data -> [Tweet]? in

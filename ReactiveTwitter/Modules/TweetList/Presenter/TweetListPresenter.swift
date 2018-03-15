@@ -42,29 +42,9 @@ class TweetListPresenter: TweetListPresenterProtocol {
         self.wireFrame = wireFrame
         
         loggedIn = MutableProperty<Bool>(false)
-        maxId = MutableProperty<Int64>(0)
-        minId = MutableProperty<Int64>(Int64.max)
         tweets = MutableProperty<[Tweet]>([])
         // Subscribe to interactor changes of account visibility
         loggedIn <~ interactor.account
-        
-        maxId <~ interactor.tweetsSignal
-            .map { [weak self] newTweets -> (Int64?) in
-                guard let strongSelf = self else { return nil }
-                let currentMax = strongSelf.maxId.value
-                guard let receivedMax = newTweets.map({$0.id}).max() else { return nil }
-                return receivedMax > currentMax ? receivedMax : nil
-            }
-            .skipNil()
-        
-        minId <~ interactor.tweetsSignal
-            .map { [weak self] newTweets -> (Int64?) in
-                guard let strongSelf = self else { return nil }
-                let currentMin = strongSelf.minId.value
-                guard let receivedMin = newTweets.map({$0.id}).min() else { return nil }
-                return receivedMin < currentMin ? receivedMin : nil
-            }
-            .skipNil()
         
         let (prefetchSignalFromView, prefetchObserver) = Signal<([Int], String?), NoError>.pipe()
         self.prefetchSignalFromView = prefetchSignalFromView
@@ -82,19 +62,20 @@ class TweetListPresenter: TweetListPresenterProtocol {
         self.prefetchSignal = self.prefetchSignalFromView
             .map { [weak self] (prefetchQuery) -> Query? in
                 guard let strongSelf = self else { return nil }
-                let minId = strongSelf.minId.value
                 let (indices, hashtag) = prefetchQuery
                 guard let unwrappedHashtag = hashtag else { return nil }
                 if indices.isEmpty {
                     return ((nil, nil, TweetListPresenter.defaultPageSize), unwrappedHashtag)
-                } else {
+                } else if let minId = strongSelf.tweets.value.last?.id {
                     return ((nil, minId-1, TweetListPresenter.defaultPageSize), unwrappedHashtag)
+                } else {
+                    return nil
                 }
             }
             .skipNil()
         
         // Subscribe to interactor changes of tweets (in local database)
-        tweets <~ SignalProducer.combineLatest(
+        tweets <~ SignalProducer.zip(
             interactor.tweetsSignal,
             SignalProducer(self.prefetchSignalFromView))
             .map { [weak self] newTweets, lastQuery -> [Tweet]? in
@@ -102,9 +83,13 @@ class TweetListPresenter: TweetListPresenterProtocol {
                 let currentTweets = strongSelf.tweets.value
                 let indices = lastQuery.0
                 let sortedNewTweets = newTweets.sorted(by: { $0.id > $1.id })
+                print(currentTweets.map {$0.id})
+                print(sortedNewTweets.map {$0.id})
+                print(strongSelf.tweets.value.last?.id ?? -1)
+                print(sortedNewTweets.first?.id ?? -1)
                 if indices.isEmpty {
                     return sortedNewTweets
-                } else if !sortedNewTweets.isEmpty && strongSelf.minId.value > sortedNewTweets.first!.id {
+                } else if let currentMinId = strongSelf.tweets.value.last?.id, let receivedMaxId = sortedNewTweets.first?.id, currentMinId > receivedMaxId {
                     return currentTweets + sortedNewTweets
                 } else {
                     return Array(Set(currentTweets + newTweets)).sorted(by: { $0.id > $1.id })
@@ -112,8 +97,6 @@ class TweetListPresenter: TweetListPresenterProtocol {
             }
             .skipNil()
         
-        minId.value = Int64.max
-        maxId.value = 0
         tweets.value = []
         
         self.prefetchObserver = prefetchObserver
