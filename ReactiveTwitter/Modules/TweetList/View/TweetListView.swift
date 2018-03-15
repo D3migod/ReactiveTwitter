@@ -80,10 +80,15 @@ extension TweetListView: UITableViewDataSource, UITableViewDelegate {
         return presenter.tweets.value.count
     }
     
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        prefetchObserver.send(value: [indexPath.row])
+    }
 }
+
+
 
 extension TweetListView: UITableViewDataSourcePrefetching {
     public func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
-        prefetchObserver.send(value: indexPaths.map{$0.row})
+//        prefetchObserver.send(value: indexPaths.map{$0.row})
     }
 }

@@ -13,15 +13,16 @@ import Result
 
 extension UIImageView {
     func setImage(_ url: URL?, stopLoadingSignal: Signal<(), NoError>) {
-        image = #imageLiteral(resourceName: "twitter_placeholder")
         if let cachedImage = ImageCache.shared.getImage(with: url as AnyObject) {
             image = cachedImage
         } else {
+            image = #imageLiteral(resourceName: "twitter_placeholder")
             guard let url = url else { return }
             getImageDownloadSignalProducer(url, stopLoadingSignal: stopLoadingSignal)
                 .observe(on: UIScheduler())
                 .startWithValues { [weak self] gotImage in
                     self?.image = gotImage
+                    ImageCache.shared.saveImage(gotImage, identifier: url as AnyObject)
                 }
         }
     }

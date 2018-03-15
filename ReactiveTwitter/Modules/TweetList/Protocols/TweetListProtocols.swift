@@ -32,7 +32,7 @@ protocol TweetListInteractorProtocol: class {
     var remoteDatamanager: TweetListRemoteDataManagerProtocol! { get set }
     
     // PRESENTER -> INTERACTOR
-    var prefetchObserver: Signal<((Int64?, Int64?, Int), String), NoError>.Observer! { get }
+    var prefetchObserver: Signal<Query, NoError>.Observer! { get }
     
     // INTERACTOR -> Presenter
     var tweetsSignal: Signal<[Tweet], NoError>! { get }

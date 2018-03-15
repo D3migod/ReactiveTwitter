@@ -14,9 +14,9 @@ typealias Query = ((Int64?, Int64?, Int), String) // TODO: Change to typealias
 
 class TweetListPresenter: TweetListPresenterProtocol {
     
-    fileprivate static let defaultPageSize = 10
+    fileprivate static let defaultPageSize = 20
     
-    fileprivate static let fetchThreshold = 5
+    fileprivate static let fetchThreshold = 10
     
     var prefetchObserver: Signal<([Int], String?), NoError>.Observer!
     var prefetchSignalFromView: Signal<([Int], String?), NoError>!
@@ -43,7 +43,7 @@ class TweetListPresenter: TweetListPresenterProtocol {
         
         loggedIn = MutableProperty<Bool>(false)
         maxId = MutableProperty<Int64>(0)
-        minId = MutableProperty<Int64>(0)
+        minId = MutableProperty<Int64>(Int64.max)
         tweets = MutableProperty<[Tweet]>([])
         // Subscribe to interactor changes of account visibility
         loggedIn <~ interactor.account
@@ -68,26 +68,27 @@ class TweetListPresenter: TweetListPresenterProtocol {
         
         let (prefetchSignalFromView, prefetchObserver) = Signal<([Int], String?), NoError>.pipe()
         self.prefetchSignalFromView = prefetchSignalFromView
+            .throttle(0.5, on: QueueScheduler.main)
+            .skipRepeats({ (firstValue, secondValue) -> Bool in
+                return firstValue.0 == secondValue.0 && firstValue.1 == secondValue.1
+            })
             .filter { [weak self] prefetchQuery in
                 guard let strongSelf = self else { return false }
                 guard let maxIndex = prefetchQuery.0.max() else { return true }
+                print(strongSelf.tweets.value.count)
                 return strongSelf.tweets.value.count - (maxIndex + 1) < TweetListPresenter.fetchThreshold
             }
+            .logEvents()
         self.prefetchSignal = self.prefetchSignalFromView
             .map { [weak self] (prefetchQuery) -> Query? in
                 guard let strongSelf = self else { return nil }
-                let tweets = strongSelf.tweets.value
                 let minId = strongSelf.minId.value
                 let (indices, hashtag) = prefetchQuery
                 guard let unwrappedHashtag = hashtag else { return nil }
                 if indices.isEmpty {
                     return ((nil, nil, TweetListPresenter.defaultPageSize), unwrappedHashtag)
                 } else {
-                    guard let maxIndex = indices.max() else { return nil}
-                    if maxIndex + 1 > tweets.count {
-                        return ((nil, minId-1, TweetListPresenter.defaultPageSize), unwrappedHashtag)
-                    }
-                    return nil
+                    return ((nil, minId-1, TweetListPresenter.defaultPageSize), unwrappedHashtag)
                 }
             }
             .skipNil()
@@ -100,12 +101,19 @@ class TweetListPresenter: TweetListPresenterProtocol {
                 guard let strongSelf = self else { return nil}
                 let currentTweets = strongSelf.tweets.value
                 let indices = lastQuery.0
-                
-                return indices.isEmpty ? newTweets : Array(Set(currentTweets).union(Set(newTweets))) // TODO: Handle insert in the middle
+                let sortedNewTweets = newTweets.sorted(by: { $0.id > $1.id })
+                if indices.isEmpty {
+                    return sortedNewTweets
+                } else if !sortedNewTweets.isEmpty && strongSelf.minId.value > sortedNewTweets.first!.id {
+                    return currentTweets + sortedNewTweets
+                } else {
+                    return Array(Set(currentTweets + newTweets)).sorted(by: { $0.id > $1.id })
+                }
             }
             .skipNil()
         
-        minId.value = 0
+        minId.value = Int64.max
+        maxId.value = 0
         tweets.value = []
         
         self.prefetchObserver = prefetchObserver

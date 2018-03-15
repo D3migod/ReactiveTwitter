@@ -40,26 +40,40 @@ class TweetListInteractor: TweetListInteractorProtocol {
         self.tweetsObserver = tweetsObserver
         self.prefetchObserver = Signal<Query, NoError>.Observer(
             value: { query in
-                remoteDatamanager.getTweetsAction.apply(query).startWithResult { (result) in
-                    switch result {
-                    case .success(let tweets):
-                        localDatamanager.save(tweets)
+                guard !query.1.isEmpty else {
+                    tweetsObserver.send(value: [])
+                    return
+                }
+                Reachability.isConnected().startWithValues({ (isInternetAvailable) in
+                    if isInternetAvailable {
+                        remoteDatamanager.getTweetsAction.apply(query).startWithResult { (result) in
+                            switch result {
+                            case .success(let tweets):
+                                localDatamanager.save(tweets)
+                                tweetsObserver.send(value: tweets)
+                            case .failure(let error):
+                                print("Remote server error occurred: \(error)")
+                                switch error {
+                                case .disabled:
+                                    return
+                                default:
+                                    guard let tweets = try? localDatamanager.getTweets(for: query) else {
+                                        print("Local database rrror occured")
+                                        return
+                                    }
+                                    tweetsObserver.send(value: tweets)
+                                    return
+                                }
+                            }
+                        }
+                    } else {
+                        guard let tweets = try? localDatamanager.getTweets(for: query) else {
+                            print("Error occured")
+                            return
+                        }
                         tweetsObserver.send(value: tweets)
-                    case .failure(let error):
-                        print("Error occurred: \(error)")
-                        break
                     }
-                }
-                
-                guard let tweets = try? localDatamanager.getTweets(for: query) else {
-                    print("Error occured")
-                    return
-                }
-                guard tweets.count > 0 else {
-                    print("No tweets")
-                    return
-                }
-                tweetsObserver.send(value: tweets)
+                })
         })
     }
 }

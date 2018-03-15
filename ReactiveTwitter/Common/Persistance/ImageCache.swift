@@ -20,4 +20,8 @@ class ImageCache {
     func getImage(with identifier: AnyObject) -> UIImage? {
         return cache.object(forKey: identifier) as? UIImage
     }
+    
+    func saveImage(_ image: UIImage, identifier: AnyObject) {
+        cache.setObject(image, forKey: identifier)
+    }
 }

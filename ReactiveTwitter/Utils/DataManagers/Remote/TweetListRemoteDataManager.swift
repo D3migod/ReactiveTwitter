@@ -43,18 +43,17 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
                 default: fatalError()
                 }
             }
-        let logEvents: Set<LoggingEvent.SignalProducer> = [.started, .completed]
         // timer that emits a reachable logged account
-        let reachableTimerWithAccount: SignalProducer<AccessToken?, NoError> = SignalProducer.combineLatest(
-            Reachability.isConnected().logEvents(events: logEvents),
-            currentAccount.logEvents(events: logEvents))
+        let reachableAccount: SignalProducer<AccessToken?, NoError> = SignalProducer.combineLatest(
+            Reachability.isConnected(),
+            currentAccount)
             .map { reachable, account in
                 return reachable ? account : nil
             }
         
         
         // Re-fetch the feed
-        let tweetsProducer: SignalProducer<[Tweet]?, NetworkError> = reachableTimerWithAccount
+        let tweetsProducer: SignalProducer<[Tweet]?, NetworkError> = reachableAccount
             .skipNil()
             .flatMap(.latest, jsonProvider)
             .observe(on: QueueScheduler.main)
