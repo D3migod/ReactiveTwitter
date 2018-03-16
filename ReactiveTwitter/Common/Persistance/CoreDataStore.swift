@@ -10,6 +10,14 @@ import UIKit
 import CoreData
 
 class CoreDataStore {
+    
+    static var persistentContainer: NSPersistentContainer? {
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            return appDelegate.persistentContainer
+        }
+        return nil
+    }
+    
     static var persistentStoreCoordinator: NSPersistentStoreCoordinator? {
         if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
             return appDelegate.persistentContainer.persistentStoreCoordinator

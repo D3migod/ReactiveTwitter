@@ -15,10 +15,8 @@ class TweetListLocalDataManager: TweetListLocalDataManagerProtocol {
     fileprivate static let tweetEntityName = "Tweet"
     fileprivate static let hashtagEntityName = "Hashtag"
     
-    fileprivate func saveTweet(_ toBeSavedTweet: Tweet) throws {
-        guard let managedOC = CoreDataStore.managedObjectContext else {
-            throw PersistenceError.managedObjectContextNotFound
-        }
+    fileprivate func saveTweet(_ toBeSavedTweet: Tweet) {
+        CoreDataStore.persistentContainer?.performBackgroundTask({ managedOC in
         
         if let newTweet = NSEntityDescription.entity(forEntityName: TweetListLocalDataManager.tweetEntityName,
                                                     in: managedOC) {
@@ -37,15 +35,14 @@ class TweetListLocalDataManager: TweetListLocalDataManagerProtocol {
                     hashtags.add(hashtag)
                 }
             })
-            try managedOC.save()
+            managedOC.saveThrows()
         }
-        
-        throw PersistenceError.couldNotSaveObject
+        })
         
     }
     
     func save(_ tweets: [Tweet]) {
-        tweets.forEach{try? saveTweet($0)}
+        tweets.forEach{saveTweet($0)}
     }
     
     func getTweets(for query: Query) throws -> [Tweet] {
