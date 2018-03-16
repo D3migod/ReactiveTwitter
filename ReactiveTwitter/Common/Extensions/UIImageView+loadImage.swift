@@ -12,6 +12,16 @@ import ReactiveSwift
 import Result
 
 extension UIImageView {
+    
+    // MARK: - Functions
+    
+    /**
+     Load and set image
+     
+     - Parameter url: url to load image by
+     
+     - Parameter stopLoadingSignal: signal aborting load (if imageView is no longer visible)
+     */
     func setImage(_ url: URL?, stopLoadingSignal: Signal<(), NoError>) {
         if let cachedImage = ImageCache.shared.getImage(with: url as AnyObject) {
             image = cachedImage
@@ -27,6 +37,13 @@ extension UIImageView {
         }
     }
     
+    /**
+     Load image by url
+     
+     - Parameter url: url to load image by
+     
+     - Parameter stopLoadingSignal: signal aborting load (if imageView is no longer visible)
+     */
     fileprivate func getImageDownloadSignalProducer(_ url: URL, stopLoadingSignal: Signal<(), NoError>) -> SignalProducer<UIImage, NoError> {
         let urlRequest = URLRequest(url: url)
         return URLSession.shared.reactive

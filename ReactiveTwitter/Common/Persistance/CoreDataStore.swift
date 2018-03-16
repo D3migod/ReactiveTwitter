@@ -11,6 +11,8 @@ import CoreData
 
 class CoreDataStore {
     
+    // MARK: - Properties
+    
     static var persistentContainer: NSPersistentContainer? {
         if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
             return appDelegate.persistentContainer

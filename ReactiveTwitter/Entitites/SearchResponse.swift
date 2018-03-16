@@ -9,5 +9,8 @@
 import Foundation
 
 struct SearchResponse: Codable {
+    
+    // MARK: - Properties
+    
     var statuses: [Tweet]
 }

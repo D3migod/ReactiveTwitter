@@ -15,7 +15,6 @@
 		03CFADF1204D2A7C00E45B48 /* ReactiveTwitterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFADF0204D2A7C00E45B48 /* ReactiveTwitterTests.swift */; };
 		03CFADFC204D2A7D00E45B48 /* ReactiveTwitterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFADFB204D2A7D00E45B48 /* ReactiveTwitterUITests.swift */; };
 		03CFAE11204D335F00E45B48 /* Tweet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFAE10204D335F00E45B48 /* Tweet.swift */; };
-		03CFAE15204D3DD200E45B48 /* TweetListCursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFAE14204D3DD200E45B48 /* TweetListCursor.swift */; };
 		03CFAE17204D3FD200E45B48 /* TweetListLocalDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFAE16204D3FD200E45B48 /* TweetListLocalDataManager.swift */; };
 		03CFAE19204D3FEE00E45B48 /* TweetListRemoteDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFAE18204D3FEE00E45B48 /* TweetListRemoteDataManager.swift */; };
 		03CFAE1C204D40EE00E45B48 /* PersistanceError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFAE1B204D40EE00E45B48 /* PersistanceError.swift */; };
@@ -30,6 +29,7 @@
 		03DED2CF2057E7E700090CC0 /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03DED2CE2057E7E700090CC0 /* Token.swift */; };
 		03DED2D1205BC24500090CC0 /* NSManagedObjectContext+saveThrows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03DED2D0205BC24500090CC0 /* NSManagedObjectContext+saveThrows.swift */; };
 		16041D6A205B185A00F49907 /* UIViewController+hideKeyboardOnTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16041D69205B185A00F49907 /* UIViewController+hideKeyboardOnTap.swift */; };
+		16041D6C205C014B00F49907 /* Hashtag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16041D6B205C014B00F49907 /* Hashtag.swift */; };
 		16815B2F20533E07002DE66F /* CodingUserInfoKey+context.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16815B2E20533E07002DE66F /* CodingUserInfoKey+context.swift */; };
 		168F5414205076C500A4F01A /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168F5413205076C500A4F01A /* Reachability.swift */; };
 		168F541620512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168F541520512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift */; };
@@ -77,7 +77,6 @@
 		03CFADFB204D2A7D00E45B48 /* ReactiveTwitterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactiveTwitterUITests.swift; sourceTree = "<group>"; };
 		03CFADFD204D2A7D00E45B48 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		03CFAE10204D335F00E45B48 /* Tweet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tweet.swift; sourceTree = "<group>"; };
-		03CFAE14204D3DD200E45B48 /* TweetListCursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweetListCursor.swift; sourceTree = "<group>"; };
 		03CFAE16204D3FD200E45B48 /* TweetListLocalDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweetListLocalDataManager.swift; sourceTree = "<group>"; };
 		03CFAE18204D3FEE00E45B48 /* TweetListRemoteDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweetListRemoteDataManager.swift; sourceTree = "<group>"; };
 		03CFAE1B204D40EE00E45B48 /* PersistanceError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistanceError.swift; sourceTree = "<group>"; };
@@ -93,6 +92,7 @@
 		03DED2D0205BC24500090CC0 /* NSManagedObjectContext+saveThrows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSManagedObjectContext+saveThrows.swift"; sourceTree = "<group>"; };
 		08F1F400D2965AEF601B48FF /* Pods-ReactiveTwitterTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveTwitterTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ReactiveTwitterTests/Pods-ReactiveTwitterTests.release.xcconfig"; sourceTree = "<group>"; };
 		16041D69205B185A00F49907 /* UIViewController+hideKeyboardOnTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+hideKeyboardOnTap.swift"; sourceTree = "<group>"; };
+		16041D6B205C014B00F49907 /* Hashtag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hashtag.swift; sourceTree = "<group>"; };
 		16815B2E20533E07002DE66F /* CodingUserInfoKey+context.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CodingUserInfoKey+context.swift"; sourceTree = "<group>"; };
 		168F5413205076C500A4F01A /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		168F541520512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweeetListRemoteDataManagerTests.swift; sourceTree = "<group>"; };
@@ -213,9 +213,9 @@
 			isa = PBXGroup;
 			children = (
 				03CFAE10204D335F00E45B48 /* Tweet.swift */,
-				03CFAE14204D3DD200E45B48 /* TweetListCursor.swift */,
 				03DED2CE2057E7E700090CC0 /* Token.swift */,
 				16E13E0920587F59009ECD09 /* SearchResponse.swift */,
+				16041D6B205C014B00F49907 /* Hashtag.swift */,
 			);
 			path = Entitites;
 			sourceTree = "<group>";
@@ -686,6 +686,7 @@
 			files = (
 				03CFAE2F204D82EA00E45B48 /* TweetListPresenter.swift in Sources */,
 				16E13E0A20587F59009ECD09 /* SearchResponse.swift in Sources */,
+				16041D6C205C014B00F49907 /* Hashtag.swift in Sources */,
 				03CFAE17204D3FD200E45B48 /* TweetListLocalDataManager.swift in Sources */,
 				03CFADE1204D2A7C00E45B48 /* ReactiveTwitter.xcdatamodeld in Sources */,
 				16041D6A205B185A00F49907 /* UIViewController+hideKeyboardOnTap.swift in Sources */,
@@ -700,7 +701,6 @@
 				03DED2D1205BC24500090CC0 /* NSManagedObjectContext+saveThrows.swift in Sources */,
 				03CFAE37204EA9F900E45B48 /* TwitterAccount.swift in Sources */,
 				03CFAE11204D335F00E45B48 /* Tweet.swift in Sources */,
-				03CFAE15204D3DD200E45B48 /* TweetListCursor.swift in Sources */,
 				03DED2CF2057E7E700090CC0 /* Token.swift in Sources */,
 				16E16C9A204DCACA00EDF996 /* ImageCache.swift in Sources */,
 				03CFAE31204D82FD00E45B48 /* TweetListInteractor.swift in Sources */,

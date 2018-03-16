@@ -12,6 +12,8 @@ import Result
 
 class TweetListWireFrame: TweetListWireFrameProtocol {
     
+    // MARK: - Constants
+    
     struct StoryboardIdentifiers {
         static let main = "Main"
     }
@@ -20,6 +22,19 @@ class TweetListWireFrame: TweetListWireFrameProtocol {
         static let tweetListNavigation = "TweetListNavigationViewController"
     }
     
+    static var mainStoryboard: UIStoryboard {
+        return UIStoryboard(name: StoryboardIdentifiers.main, bundle: Bundle.main)
+    }
+    
+    // MARK: - Initializer
+    
+    /**
+     Creates other properties in the module and connects them
+     
+     - Parameter account: Account with current login status
+     
+     - Returns UIViewController to be presented on load
+     */
     class func createConnections(account: SignalProducer<TwitterAccount.AccountStatus, NoError>) -> UIViewController {
         let wireFrame = TweetListWireFrame()
         let localDataManager: TweetListLocalDataManagerProtocol = TweetListLocalDataManager()
@@ -40,9 +55,5 @@ class TweetListWireFrame: TweetListWireFrameProtocol {
         }
         navigationController.pushViewController(view, animated: false)
         return navigationController
-    }
-    
-    static var mainStoryboard: UIStoryboard {
-        return UIStoryboard(name: StoryboardIdentifiers.main, bundle: Bundle.main)
     }
 }

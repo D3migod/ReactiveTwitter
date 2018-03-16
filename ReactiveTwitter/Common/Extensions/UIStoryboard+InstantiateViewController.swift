@@ -10,6 +10,8 @@ import Foundation
 import UIKit
 
 extension UIStoryboard {
+    
+    /// Instantiates ViewController by its class name. It must be equal to viewController's identifier.
     func instantiateViewController<T>(ofType type: T.Type) -> T {
         return instantiateViewController(withIdentifier: String(describing: type)) as! T
     }

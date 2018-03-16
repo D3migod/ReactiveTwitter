@@ -9,5 +9,7 @@
 import Foundation
 
 extension CodingUserInfoKey {
+    
+//    passing context to decoder/encoder. Required for combining Coder and CoreData
     static let context = CodingUserInfoKey(rawValue: "context")!
 }

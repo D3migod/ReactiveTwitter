@@ -10,28 +10,35 @@ import Foundation
 import ReactiveSwift
 import Result
 
-typealias Query = ((Int64?, Int64?, Int), String) // TODO: Change to typealias
-
 class TweetListPresenter: TweetListPresenterProtocol {
+    
+    // MARK: - Constants
     
     fileprivate static let defaultPageSize = 20
     
     fileprivate static let fetchThreshold = 10
     
-    var prefetchObserver: Signal<([Int], String?), NoError>.Observer!
-    
-    var prefetchSignalFromView: Signal<([Int], String?), NoError>!
-    
-    var prefetchSignal: Signal<Query, NoError>!
+    // MARK: - Properties
     
     var interactor: TweetListInteractorProtocol!
     
     var wireFrame: TweetListWireFrameProtocol!
     
-    // MARK: - Output
-    var tweets: MutableProperty<[Tweet]>! //private(set)
+    // MARK: - View -> Presenter
+    
+    var prefetchObserver: Signal<(PrefetchCellIndices, SearchString?), NoError>.Observer!
+    
+    // MARK: - Presenter -> Interactor
+    
+    var prefetchSignal: Signal<Query, NoError>!
+    
+    // MARK: - Presenter -> View
+    
+    var tweets: MutableProperty<[Tweet]>!
     
     var loggedIn: MutableProperty<Bool>!
+    
+    // MARK: - Initializer
     
     init(interactor: TweetListInteractorProtocol,
          wireFrame: TweetListWireFrameProtocol) {
@@ -40,11 +47,10 @@ class TweetListPresenter: TweetListPresenterProtocol {
         
         loggedIn = MutableProperty<Bool>(false)
         tweets = MutableProperty<[Tweet]>([])
-        // Subscribe to interactor changes of account visibility
         loggedIn <~ interactor.account
         
         let (prefetchSignalFromView, prefetchObserver) = Signal<([Int], String?), NoError>.pipe()
-        self.prefetchSignalFromView = prefetchSignalFromView
+        let filteredPrefetchSignal = prefetchSignalFromView
             .throttle(0.5, on: QueueScheduler.main)
             .skipRepeats({ (firstValue, secondValue) -> Bool in
                 return firstValue.0 == secondValue.0 && firstValue.1 == secondValue.1
@@ -55,7 +61,7 @@ class TweetListPresenter: TweetListPresenterProtocol {
                 return strongSelf.tweets.value.count - (maxIndex + 1) < TweetListPresenter.fetchThreshold
             }
             .logEvents()
-        self.prefetchSignal = self.prefetchSignalFromView
+        self.prefetchSignal = filteredPrefetchSignal
             .map { [weak self] (prefetchQuery) -> Query? in
                 guard let strongSelf = self else { return nil }
                 let (indices, hashtag) = prefetchQuery
@@ -70,7 +76,6 @@ class TweetListPresenter: TweetListPresenterProtocol {
             }
             .skipNil()
         
-        // Subscribe to interactor changes of tweets (in local database)
         tweets <~ interactor.tweetsSignal
             .map { [weak self] response -> [Tweet]? in
                 guard let strongSelf = self else { return nil}

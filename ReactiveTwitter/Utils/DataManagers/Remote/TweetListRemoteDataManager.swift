@@ -13,17 +13,27 @@ import Result
 
 class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
     
-    // MARK: output
-    var getTweetsAction: Action<Query, [Tweet], NoError>!
+    // MARK: - Properties
     
+    /// SignalProducer emitting current authorization status
     var account: SignalProducer<TwitterAccount.AccountStatus, NoError>!
     
+    // MARK: - Initializer
     
     init(account: SignalProducer<TwitterAccount.AccountStatus, NoError>) {
         self.account = account
     }
     
+    // MARK: - Functions
     
+    /**
+     Creates DataProvider returning tweets by performing request to remote server
+     
+     - Parameter jsonProvider: function that accepts current token, performs request and
+     returns SignalProducer emitting response Data
+     
+     - Returns SignalProducer emitting tweets converted from data
+     */
     func createDataProvider(jsonProvider: @escaping (AccessToken) -> SignalProducer<Data, NetworkError>) -> SignalProducer<[Tweet], NoError> {
 
         let currentAccount: SignalProducer<AccessToken, NoError> = account
@@ -41,20 +51,22 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
                 }
             }
         // timer that emits a reachable logged account
-//        let reachableAccount: SignalProducer<AccessToken?, NoError> = SignalProducer.combineLatest(
-//            Reachability.isConnected(),
-//            currentAccount)
-//            .map { reachable, account in
-//                return reachable ? account : nil
-//            }
-        let reachableAccount = currentAccount
+        let reachableAccount: SignalProducer<AccessToken?, NoError> = SignalProducer.combineLatest(
+            Reachability.isConnected(),
+            currentAccount)
+            .map { reachable, account in
+                return reachable ? account : nil
+            }
         
-        // Re-fetch the feed
-        let tweetsProducer: SignalProducer<[Tweet]?, NetworkError> = reachableAccount //.skipNil()
+        // Refetch the feed
+        let tweetsProducer: SignalProducer<[Tweet]?, NetworkError> = reachableAccount
+            .skipNil()
             .flatMap(.latest, jsonProvider)
             .observe(on: QueueScheduler.main)
             .map { data -> [Tweet]? in
-                let context = CoreDataStore.managedObjectContext
+                let context = CoreDataStore.persistentContainer?.newBackgroundContext()
+                CoreDataStore.persistentContainer?.viewContext.automaticallyMergesChangesFromParent = true
+                
                 let decoder = JSONDecoder()
                 decoder.userInfo[.context] = context
                 guard let result = try? decoder.decode(SearchResponse.self, from: data) else {

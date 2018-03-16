@@ -11,15 +11,24 @@ import ReactiveSwift
 import Result
 
 class TweetListInteractor: TweetListInteractorProtocol {
-    var prefetchObserver: Signal<Query, NoError>.Observer!
+    
+    // MARK: - Properties
     
     var localDatamanager: TweetListLocalDataManagerProtocol!
     
     var remoteDatamanager: TweetListRemoteDataManagerProtocol!
     
+    var account: SignalProducer<Bool, NoError>!
+    
+    // MARK: - Interactor -> Presenter
+    
     var tweetsSignal: Signal<([Tweet], Query), NoError>!
     
-    var account: SignalProducer<Bool, NoError>!
+    // MARK: - Presenter -> Interactor
+    
+    var prefetchObserver: Signal<Query, NoError>.Observer!
+    
+    // MARK: - Initializer
     
     init(localDatamanager: TweetListLocalDataManagerProtocol,
          remoteDatamanager: TweetListRemoteDataManagerProtocol,

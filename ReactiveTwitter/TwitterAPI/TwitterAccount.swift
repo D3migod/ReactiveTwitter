@@ -10,27 +10,39 @@ import Foundation
 import ReactiveSwift
 import Result
 
-
-
 class TwitterAccount {
     
+    /// Singleton
     static let shared = TwitterAccount()
     
-    // logged or not
+    /**
+     Authorization status
+     
+     - unavailable: not authorized
+     - authorized: authorized with token
+    */
     enum AccountStatus {
         case unavailable
         case authorized(AccessToken)
     }
     
+    // MARK: - Constants
+    
     fileprivate static let tokenPersistanceKey = "ReactiveTwitter token"
     
+    // MARK: - Properties
+    
     private var key: String!
+    
     private var secret: String!
+    
+    /// Setter for key and secret
     public func set(key: String, secret: String) {
         self.key = key
         self.secret = secret
     }
     
+    /// User token
     var token: String? {
         get {
             return KeyChain.retrieveValue(for: TwitterAccount.tokenPersistanceKey)
@@ -40,6 +52,7 @@ class TwitterAccount {
         }
     }
     
+    /// Account
     var account: SignalProducer<AccountStatus, NoError> {
         return SignalProducer<AccountStatus, NoError> { observer, _ in
             if let token = self.token {
@@ -66,14 +79,13 @@ class TwitterAccount {
             }.replayLazily(upTo: 1)
     }
     
-    enum Errors: Error {
-        case unableToGetToken, invalidResponse
-    }
+    // MARK: - Functions
     
-    // MARK: - Properties
-    
-    // MARK: - Getting the current twitter account
-    
+    /**
+     Returns SignalProducer that emits user token
+     
+     - Returns: SignalProducer emitting token
+     */
     func getTokenRequestSignalProducer() -> SignalProducer<Token, NetworkError> {
         var headers: HTTPHeaders = ["Content-Type": "application/x-www-form-urlencoded;charset=UTF-8", "Accept-Encoding":"gzip", "Host": "api.twitter.com"]
         if let authorizationHeader = authorizationHeader(user: TwitterAccount.shared.key, password: TwitterAccount.shared.secret) {
@@ -94,6 +106,15 @@ class TwitterAccount {
         .skipNil()
     }
     
+    /**
+     Returns Authorization header with encoded credentials
+     
+     - Parameter user: login
+     
+     - Parameter password: password
+     
+     - Returns: Authorization key-value pair
+     */
     fileprivate func authorizationHeader(user: String, password: String) -> (key: String, value: String)? {
         guard let data = "\(user):\(password)".data(using: .utf8) else { return nil }
         
@@ -101,6 +122,4 @@ class TwitterAccount {
         
         return (key: "Authorization", value: "Basic \(credential)")
     }
-    
-    
 }

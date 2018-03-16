@@ -9,6 +9,9 @@
 import Foundation
 
 struct Token: Decodable {
+    
+    // MARK: - Properties
+    
     let token: String
     let tokenType: String
     
@@ -16,6 +19,8 @@ struct Token: Decodable {
         self.token = token
         self.tokenType = tokenType
     }
+    
+    // MARK: - Decodable
     
     enum CodingKeys : String, CodingKey {
         case token = "access_token"

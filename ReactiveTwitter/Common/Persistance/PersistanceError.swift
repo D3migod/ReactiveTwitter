@@ -8,8 +8,11 @@
 
 import Foundation
 
+/**
+ Persistance error
+ 
+ - managedObjectContextNotFound: context does not exist
+ */
 enum PersistenceError: Error {
     case managedObjectContextNotFound
-    case couldNotSaveObject
-    case objectNotFound
 }

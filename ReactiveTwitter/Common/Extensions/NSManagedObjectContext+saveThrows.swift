@@ -10,6 +10,8 @@ import Foundation
 import CoreData
 
 extension NSManagedObjectContext {
+    
+    /// Saves context changes
     public func saveThrows() { // ultimate save for any context including background one
         if self.hasChanges {
             do {

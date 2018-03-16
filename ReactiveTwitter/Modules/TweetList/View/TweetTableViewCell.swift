@@ -18,7 +18,6 @@ class TweetTableViewCell: UITableViewCell {
         name.text = tweet.name
         message.text = tweet.text
         photo.setImage(URL(string: tweet.imageUrl), stopLoadingSignal: reactive.prepareForReuse)
-        
     }
     
     

@@ -13,6 +13,13 @@ import Result
 
 public class Reachability {
     
+    // MARK: - Functions
+    
+    /**
+     SignalProducer emitting single isConnected boolean value 
+     
+     - Returns: Authorization key-value header
+     */
     public static func isConnected() -> SignalProducer<Bool, NoError> {
         
         var zeroAddress = sockaddr_in() // Initialize socketAddress (C struct) with zeros

@@ -13,13 +13,15 @@ import Result
 
 class TweetListView: UIViewController, TweetListViewProtocol {
     
+    // MARK: - IBOutlets
+    
     @IBOutlet weak var tableView: UITableView!
     
     @IBOutlet weak var messageView: UIView!
     
     @IBOutlet weak var searchBar: UISearchBar!
     
-    var prefetchSignal: Signal<[Int], NoError>!
+    // MARK: - Properties
     
     var prefetchObserver: Signal<[Int], NoError>.Observer!
     
@@ -27,11 +29,19 @@ class TweetListView: UIViewController, TweetListViewProtocol {
     
     var presenter: TweetListPresenterProtocol!
     
+    // MARK: - View -> Presenter
+    
+    var prefetchSignal: Signal<[Int], NoError>!
+    
+    // MARK: - Initializer
+    
     static func createWith(storyboard: UIStoryboard, presenter: TweetListPresenterProtocol) -> TweetListView {
         let tweetListView = storyboard.instantiateViewController(ofType: TweetListView.self)
         tweetListView.presenter = presenter
         return tweetListView
     }
+    
+    // MARK: - Life cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,6 +55,8 @@ class TweetListView: UIViewController, TweetListViewProtocol {
         hideKeyboardOnTap()
         bindUI()
     }
+    
+    // MARK: - Functions
     
     func bindUI() {
         let (prefetchSignal, prefetchObserver) = Signal<[Int], NoError>.pipe()
@@ -92,13 +104,7 @@ extension TweetListView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return presenter.tweets.value.count
     }
-//    
-//    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-//        prefetchObserver.send(value: [indexPath.row])
-//    }
 }
-
-
 
 extension TweetListView: UITableViewDataSourcePrefetching {
     public func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {

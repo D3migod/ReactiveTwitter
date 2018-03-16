@@ -10,7 +10,12 @@ import Foundation
 import CoreData
 
 class Tweet: NSManagedObject, Decodable {
+    
+    // MARK: - Constants
+    
     fileprivate static let twitterDateFormat = "EEE MMM dd HH:mm:ss Z yyyy"
+    
+    // MARK: - Properties
     
     @NSManaged var id: Int64
     @NSManaged var text: String
@@ -18,6 +23,8 @@ class Tweet: NSManagedObject, Decodable {
     @NSManaged var created: Date?
     @NSManaged var imageUrl: String
     @NSManaged var hashtags: Set<Hashtag>?
+    
+    // MARK: - Decodable
     
     enum UserKeys: String, CodingKey {
         case name, imageUrl = "profile_image_url_https"
@@ -79,22 +86,3 @@ extension Tweet {
     }
 }
 
-class Hashtag: NSManagedObject, Codable {
-    @NSManaged var text: String
-    enum HashtagCodingKeys : String, CodingKey {
-        case text
-    }
-    required convenience init(from decoder: Decoder) throws {
-        guard let context = decoder.userInfo[.context] as? NSManagedObjectContext else { fatalError() }
-        guard let entity = NSEntityDescription.entity(forEntityName: String(describing: Hashtag.self), in: context) else { fatalError() }
-        self.init(entity: entity, insertInto: nil)
-        
-        let values = try decoder.container(keyedBy: HashtagCodingKeys.self)
-        text = try values.decode(String.self, forKey: .text)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: HashtagCodingKeys.self)
-        try container.encode(text, forKey: .text)
-    }
-}

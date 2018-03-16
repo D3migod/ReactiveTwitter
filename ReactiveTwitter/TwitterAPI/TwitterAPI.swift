@@ -33,7 +33,6 @@ protocol TwitterAPIProtcol {
 
 struct TwitterAPI: TwitterAPIProtcol {
     
-    
     fileprivate enum Address: String {
         case search = "search/tweets.json"
         
@@ -44,6 +43,13 @@ struct TwitterAPI: TwitterAPIProtcol {
         }
     }
     
+    /**
+     Creates SignalProducer that returns tweet list returned from server on request in the Data format.
+     
+     - Parameter query: query to request data from server
+     
+     - Returns: SignalProducer emitting tweets in Data format
+     */
     static func getTweetList(for query: Query) -> (AccessToken) -> SignalProducer<Data, NetworkError> {
         let ((minId, maxId, count), hashtag) = query
         return { account in
@@ -63,9 +69,18 @@ struct TwitterAPI: TwitterAPIProtcol {
         }
     }
     
-    
-    // MARK: - generic request to send an SLRequest
-    static private func request(_ token: AccessToken, address: Address, parameters: [String: String] = [:]) -> SignalProducer<Data, NetworkError> {
+    /**
+     Forms network request and passes it to perform function
+     
+     - Parameter token: current user token
+     
+     - Parameter address: base url
+     
+     - Parameter parameters: request parameters
+     
+     - Returns: SignalProducer emitting server response in Data format
+     */
+    static private func request(_ token: AccessToken, address: Address, parameters: HTTPParameters = [:]) -> SignalProducer<Data, NetworkError> {
         guard let request = createAuthorizedRequest(token, address: address, parameters: parameters) else {
             return SignalProducer<Data, NetworkError> { observer, _ in
                 observer.send(error: NetworkError.invalidUrl)
@@ -74,6 +89,13 @@ struct TwitterAPI: TwitterAPIProtcol {
         return performRequest(by: request)
     }
     
+    /**
+     Performs request passed as parameter
+     
+     - Parameter request: request to perform
+     
+     - Returns: SignalProducer emitting server response in Data format
+     */
     static func performRequest(by request: URLRequest) -> SignalProducer<Data, NetworkError> {
         return URLSession.shared.reactive
             .data(with: request)
@@ -113,10 +135,36 @@ struct TwitterAPI: TwitterAPIProtcol {
             })
     }
     
+    /**
+     Forms network request and passes it to perform function
+     
+     - Parameter token: current user token
+     
+     - Parameter address: base url
+     
+     - Parameter parameters: request http parameters
+     
+     - Returns: request created from parameters appending authorization header
+     */
     static private func createAuthorizedRequest(_ token: AccessToken, address: Address, parameters: HTTPParameters = [:]) -> URLRequest? {
         return createRequest(address.url, parameters: parameters, headers: ["Authorization": "Bearer \(token)"])
     }
     
+    /**
+     Forms request
+     
+     - Parameter url: url to form request to
+     
+     - Parameter parameters: http parameters to add to url
+     
+     - Parameter bodyParameters: body parameters to add to body
+     
+     - Parameter headers: http headers
+     
+     - Parameter method: .get/.post
+     
+     - Returns: request created from parameters
+     */
     static func createRequest(_ url: URL?, parameters: HTTPParameters? = nil, bodyParameters: String? = nil, headers: HTTPHeaders, method: HTTPRequestMethod = .get) -> URLRequest? {
         guard let unwrappedUrl = url, var comps = URLComponents(string: unwrappedUrl.absoluteString) else {
             print("Incorrect url \(String(describing: url))")
