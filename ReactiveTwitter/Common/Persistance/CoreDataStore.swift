@@ -47,6 +47,7 @@ class CoreDataStore {
             return privateBackgroundManagedObjectContext
         } else if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
             privateBackgroundManagedObjectContext = appDelegate.persistentContainer.newBackgroundContext()
+            privateBackgroundManagedObjectContext?.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
             return privateBackgroundManagedObjectContext
         }
         return nil
