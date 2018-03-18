@@ -12,7 +12,6 @@
 		03CFADE1204D2A7C00E45B48 /* ReactiveTwitter.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 03CFADDF204D2A7C00E45B48 /* ReactiveTwitter.xcdatamodeld */; };
 		03CFADE3204D2A7C00E45B48 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 03CFADE2204D2A7C00E45B48 /* Assets.xcassets */; };
 		03CFADE6204D2A7C00E45B48 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 03CFADE4204D2A7C00E45B48 /* LaunchScreen.storyboard */; };
-		03CFADF1204D2A7C00E45B48 /* ReactiveTwitterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFADF0204D2A7C00E45B48 /* ReactiveTwitterTests.swift */; };
 		03CFADFC204D2A7D00E45B48 /* ReactiveTwitterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFADFB204D2A7D00E45B48 /* ReactiveTwitterUITests.swift */; };
 		03CFAE11204D335F00E45B48 /* Tweet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFAE10204D335F00E45B48 /* Tweet.swift */; };
 		03CFAE17204D3FD200E45B48 /* TweetListLocalDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CFAE16204D3FD200E45B48 /* TweetListLocalDataManager.swift */; };
@@ -76,7 +75,6 @@
 		03CFADE5204D2A7C00E45B48 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		03CFADE7204D2A7C00E45B48 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		03CFADEC204D2A7C00E45B48 /* ReactiveTwitterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReactiveTwitterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		03CFADF0204D2A7C00E45B48 /* ReactiveTwitterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactiveTwitterTests.swift; sourceTree = "<group>"; };
 		03CFADF2204D2A7C00E45B48 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		03CFADF7204D2A7D00E45B48 /* ReactiveTwitterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReactiveTwitterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		03CFADFB204D2A7D00E45B48 /* ReactiveTwitterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactiveTwitterUITests.swift; sourceTree = "<group>"; };
@@ -195,7 +193,6 @@
 			isa = PBXGroup;
 			children = (
 				168F5417205138E800A4F01A /* Mocks */,
-				03CFADF0204D2A7C00E45B48 /* ReactiveTwitterTests.swift */,
 				03CFADF2204D2A7C00E45B48 /* Info.plist */,
 				168F541520512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift */,
 				16041D6F205D2FC400F49907 /* TweetListLocalDataManagerTests.swift */,
@@ -735,7 +732,6 @@
 				16041D7A205DB2CC00F49907 /* MockTweetListWireFrame.swift in Sources */,
 				16041D74205DA77F00F49907 /* TweetListPresenterTests.swift in Sources */,
 				16041D72205D4B1E00F49907 /* XCTest+compareTweets.swift in Sources */,
-				03CFADF1204D2A7C00E45B48 /* ReactiveTwitterTests.swift in Sources */,
 				168F54192051390700A4F01A /* TweetsData.swift in Sources */,
 				168F541620512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift in Sources */,
 				16041D70205D2FC400F49907 /* TweetListLocalDataManagerTests.swift in Sources */,

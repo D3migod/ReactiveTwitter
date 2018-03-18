@@ -23,12 +23,14 @@ class MockTweetListInteractor: TweetListInteractorProtocol {
     // Interactor -> Presenter
     var tweetsSignal: Signal<([Tweet], Query), NoError>!
     
-    init(prefetchObserver: Signal<Query, NoError>.Observer = Signal<Query, NoError>.Observer(), tweetsSignal: Signal<([Tweet], Query), NoError> = Signal<([Tweet], Query), NoError>.empty) {
-        self.prefetchObserver = prefetchObserver
-        self.tweetsSignal = tweetsSignal
-        self.account = SignalProducer<Bool, NoError> { observer, _ in
+    init(prefetchObserver: Signal<Query, NoError>.Observer = Signal<Query, NoError>.Observer(),
+         tweetsSignal: Signal<([Tweet], Query), NoError> = Signal<([Tweet], Query), NoError>.empty,
+         account: SignalProducer<Bool, NoError> = SignalProducer<Bool, NoError> { observer, _ in
             observer.send(value: true)
             observer.sendCompleted()
-        }
+        }) {
+        self.prefetchObserver = prefetchObserver
+        self.tweetsSignal = tweetsSignal
+        self.account = account
     }
 }

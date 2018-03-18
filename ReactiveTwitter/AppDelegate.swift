@@ -15,7 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     let testing = NSClassFromString("XCTest") != nil
-    let account = TwitterAccount().account
+    let account = TwitterAccount.shared.account
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         TwitterAccount.shared.set(key: "R7DxgkHrZx6jn6oNDDGdaChAU",

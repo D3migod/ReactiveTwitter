@@ -51,7 +51,7 @@ class TweetListWireFrame: TweetListWireFrameProtocol {
             storyboard: TweetListWireFrame.mainStoryboard,
             presenter: presenter)
         guard let navigationController = mainStoryboard.instantiateViewController(withIdentifier: ViewControllerIdentifiers.tweetListNavigation) as? UINavigationController else {
-            return UIViewController()
+            return view
         }
         navigationController.pushViewController(view, animated: false)
         return navigationController

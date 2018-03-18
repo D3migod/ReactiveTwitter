@@ -14,10 +14,7 @@ import Result
 
 class TweetListRemoteDataManagerTests: XCTestCase {
     
-    let authorizedAccount = SignalProducer<TwitterAccount.AccountStatus, NoError> { observer, _ in
-        observer.send(value: TwitterAccount.AccountStatus.authorized(AccessToken()))
-        observer.sendCompleted()
-    }
+    let authorizedAccount = TwitterAccount.shared.account
     
     let unauthorizedAccount = SignalProducer<TwitterAccount.AccountStatus, NoError> { observer, _ in
         observer.send(value: TwitterAccount.AccountStatus.unavailable)
@@ -40,34 +37,42 @@ class TweetListRemoteDataManagerTests: XCTestCase {
     }
  
     func test_sending_tweets_on_start() {
-        createAuthorizedDataProvider().startWithValues { [weak self] value in
-            self?.AssertMultipleTweetsEqual(value, TweetsData.tweets)
+        let expect = expectation(description: "Value emitted")
+        createAuthorizedDataProvider().startWithValues { value in
+            XCTAssertTrue(!value.isEmpty)
+            expect.fulfill()
         }
+        waitForExpectations(timeout: 5.0, handler: nil)
     }
     
     func test_not_sending_tweets_on_anauthorized_account() {
+        let expect = expectation(description: "Value emitted")
         let resultObserver = Signal<[Tweet], NoError>.Observer(
             value: { _ in XCTFail() },
-            interrupted: { XCTAssertTrue(true)}
+            completed: { XCTAssertTrue(true); expect.fulfill() }
         )
         createUnauthorizedDataProvider().start(resultObserver)
+        waitForExpectations(timeout: 2.0, handler: nil)
     }
     
     func test_changing_authorization_status() {
+        let expect = expectation(description: "Value emitted")
         var isAuthorized = true
         let changingStatusAccount = SignalProducer<TwitterAccount.AccountStatus, NoError> { observer, _ in
             isAuthorized = !isAuthorized
-            observer.send(value: isAuthorized ? TwitterAccount.AccountStatus.authorized(AccessToken()) : TwitterAccount.AccountStatus.unavailable)
+            observer.send(value: isAuthorized ? TwitterAccount.AccountStatus.authorized(TwitterAccount.shared.token!) : TwitterAccount.AccountStatus.unavailable)
             observer.sendCompleted()
         }
         let dataProvider = createDataProvider(account: changingStatusAccount)
         let resultObserver = Signal<[Tweet], NoError>.Observer(
             value: { _ in XCTFail() },
-            interrupted: { XCTAssertTrue(true)}
+            completed: { XCTAssertTrue(true)}
         )
         dataProvider.start(resultObserver)
-        dataProvider.startWithValues { [weak self] value in
-            self?.AssertMultipleTweetsEqual(value, TweetsData.tweets)
+        dataProvider.startWithValues { value in
+            XCTAssertTrue(!value.isEmpty)
+            expect.fulfill()
         }
+        waitForExpectations(timeout: 5.0, handler: nil)
     }
 }
