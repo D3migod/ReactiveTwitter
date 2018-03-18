@@ -16,7 +16,7 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
     // MARK: - Properties
     
     /// SignalProducer emitting current authorization status
-    var account: SignalProducer<TwitterAccount.AccountStatus, NoError>!
+    fileprivate var account: SignalProducer<TwitterAccount.AccountStatus, NoError>!
     
     // MARK: - Initializer
     
@@ -65,8 +65,6 @@ class TweetListRemoteDataManager: TweetListRemoteDataManagerProtocol {
             .observe(on: QueueScheduler.main)
             .map { data -> [Tweet]? in
                 let context = CoreDataStore.persistentContainer?.newBackgroundContext()
-                CoreDataStore.persistentContainer?.viewContext.automaticallyMergesChangesFromParent = true
-                
                 let decoder = JSONDecoder()
                 decoder.userInfo[.context] = context
                 guard let result = try? decoder.decode(SearchResponse.self, from: data) else {

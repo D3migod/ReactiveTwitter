@@ -16,7 +16,7 @@ class TweetListPresenter: TweetListPresenterProtocol {
     
     fileprivate static let defaultPageSize = 20
     
-    fileprivate static let fetchThreshold = 10
+    fileprivate static let defaultFetchThreshold = 10
     
     // MARK: - Properties
     
@@ -41,7 +41,9 @@ class TweetListPresenter: TweetListPresenterProtocol {
     // MARK: - Initializer
     
     init(interactor: TweetListInteractorProtocol,
-         wireFrame: TweetListWireFrameProtocol) {
+         wireFrame: TweetListWireFrameProtocol,
+         pageSize: Int = defaultPageSize,
+         fetchThreshold: Int = defaultFetchThreshold) {
         self.interactor = interactor
         self.wireFrame = wireFrame
         
@@ -58,18 +60,17 @@ class TweetListPresenter: TweetListPresenterProtocol {
             .filter { [weak self] prefetchQuery in
                 guard let strongSelf = self else { return false }
                 guard let maxIndex = prefetchQuery.0.max() else { return true }
-                return strongSelf.tweets.value.count - (maxIndex + 1) < TweetListPresenter.fetchThreshold
+                return strongSelf.tweets.value.count - (maxIndex + 1) < fetchThreshold
             }
-            .logEvents()
         self.prefetchSignal = filteredPrefetchSignal
             .map { [weak self] (prefetchQuery) -> Query? in
                 guard let strongSelf = self else { return nil }
                 let (indices, hashtag) = prefetchQuery
                 guard let unwrappedHashtag = hashtag else { return nil }
                 if indices.isEmpty {
-                    return ((nil, nil, TweetListPresenter.defaultPageSize), unwrappedHashtag)
+                    return ((nil, nil, pageSize), unwrappedHashtag)
                 } else if let minId = strongSelf.tweets.value.last?.id {
-                    return ((nil, minId-1, TweetListPresenter.defaultPageSize), unwrappedHashtag)
+                    return ((nil, minId-1, pageSize), unwrappedHashtag)
                 } else {
                     return nil
                 }

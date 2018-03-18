@@ -74,4 +74,7 @@ protocol TweetListLocalDataManagerProtocol: class {
     
     // LocalDataManager -> Interactor
     func getTweets(for query: Query) throws -> [Tweet]
+    
+    // Clears the entire database
+    func clear() throws
 }

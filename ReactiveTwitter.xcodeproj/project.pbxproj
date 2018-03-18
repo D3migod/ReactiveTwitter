@@ -30,6 +30,11 @@
 		03DED2D1205BC24500090CC0 /* NSManagedObjectContext+saveThrows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03DED2D0205BC24500090CC0 /* NSManagedObjectContext+saveThrows.swift */; };
 		16041D6A205B185A00F49907 /* UIViewController+hideKeyboardOnTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16041D69205B185A00F49907 /* UIViewController+hideKeyboardOnTap.swift */; };
 		16041D6C205C014B00F49907 /* Hashtag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16041D6B205C014B00F49907 /* Hashtag.swift */; };
+		16041D70205D2FC400F49907 /* TweetListLocalDataManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16041D6F205D2FC400F49907 /* TweetListLocalDataManagerTests.swift */; };
+		16041D72205D4B1E00F49907 /* XCTest+compareTweets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16041D71205D4B1E00F49907 /* XCTest+compareTweets.swift */; };
+		16041D74205DA77F00F49907 /* TweetListPresenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16041D73205DA77F00F49907 /* TweetListPresenterTests.swift */; };
+		16041D76205DACE900F49907 /* MockTweetListInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16041D75205DACE900F49907 /* MockTweetListInteractor.swift */; };
+		16041D7A205DB2CC00F49907 /* MockTweetListWireFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16041D79205DB2CC00F49907 /* MockTweetListWireFrame.swift */; };
 		16815B2F20533E07002DE66F /* CodingUserInfoKey+context.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16815B2E20533E07002DE66F /* CodingUserInfoKey+context.swift */; };
 		168F5414205076C500A4F01A /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168F5413205076C500A4F01A /* Reachability.swift */; };
 		168F541620512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168F541520512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift */; };
@@ -93,6 +98,11 @@
 		08F1F400D2965AEF601B48FF /* Pods-ReactiveTwitterTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveTwitterTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ReactiveTwitterTests/Pods-ReactiveTwitterTests.release.xcconfig"; sourceTree = "<group>"; };
 		16041D69205B185A00F49907 /* UIViewController+hideKeyboardOnTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+hideKeyboardOnTap.swift"; sourceTree = "<group>"; };
 		16041D6B205C014B00F49907 /* Hashtag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hashtag.swift; sourceTree = "<group>"; };
+		16041D6F205D2FC400F49907 /* TweetListLocalDataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweetListLocalDataManagerTests.swift; sourceTree = "<group>"; };
+		16041D71205D4B1E00F49907 /* XCTest+compareTweets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTest+compareTweets.swift"; sourceTree = "<group>"; };
+		16041D73205DA77F00F49907 /* TweetListPresenterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweetListPresenterTests.swift; sourceTree = "<group>"; };
+		16041D75205DACE900F49907 /* MockTweetListInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTweetListInteractor.swift; sourceTree = "<group>"; };
+		16041D79205DB2CC00F49907 /* MockTweetListWireFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTweetListWireFrame.swift; sourceTree = "<group>"; };
 		16815B2E20533E07002DE66F /* CodingUserInfoKey+context.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CodingUserInfoKey+context.swift"; sourceTree = "<group>"; };
 		168F5413205076C500A4F01A /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		168F541520512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweeetListRemoteDataManagerTests.swift; sourceTree = "<group>"; };
@@ -188,6 +198,9 @@
 				03CFADF0204D2A7C00E45B48 /* ReactiveTwitterTests.swift */,
 				03CFADF2204D2A7C00E45B48 /* Info.plist */,
 				168F541520512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift */,
+				16041D6F205D2FC400F49907 /* TweetListLocalDataManagerTests.swift */,
+				16041D71205D4B1E00F49907 /* XCTest+compareTweets.swift */,
+				16041D73205DA77F00F49907 /* TweetListPresenterTests.swift */,
 			);
 			path = ReactiveTwitterTests;
 			sourceTree = "<group>";
@@ -360,6 +373,8 @@
 			isa = PBXGroup;
 			children = (
 				168F54182051390700A4F01A /* TweetsData.swift */,
+				16041D75205DACE900F49907 /* MockTweetListInteractor.swift */,
+				16041D79205DB2CC00F49907 /* MockTweetListWireFrame.swift */,
 			);
 			path = Mocks;
 			sourceTree = "<group>";
@@ -717,9 +732,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16041D7A205DB2CC00F49907 /* MockTweetListWireFrame.swift in Sources */,
+				16041D74205DA77F00F49907 /* TweetListPresenterTests.swift in Sources */,
+				16041D72205D4B1E00F49907 /* XCTest+compareTweets.swift in Sources */,
 				03CFADF1204D2A7C00E45B48 /* ReactiveTwitterTests.swift in Sources */,
 				168F54192051390700A4F01A /* TweetsData.swift in Sources */,
 				168F541620512CDB00A4F01A /* TweeetListRemoteDataManagerTests.swift in Sources */,
+				16041D70205D2FC400F49907 /* TweetListLocalDataManagerTests.swift in Sources */,
+				16041D76205DACE900F49907 /* MockTweetListInteractor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

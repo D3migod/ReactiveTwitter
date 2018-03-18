@@ -40,4 +40,17 @@ class CoreDataStore {
         }
         return nil
     }
+    
+    static var backgroundManagedObjectContext: NSManagedObjectContext? {
+        if let privateBackgroundManagedObjectContext = privateBackgroundManagedObjectContext {
+            try? privateBackgroundManagedObjectContext.setQueryGenerationFrom(.current)
+            return privateBackgroundManagedObjectContext
+        } else if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            privateBackgroundManagedObjectContext = appDelegate.persistentContainer.newBackgroundContext()
+            return privateBackgroundManagedObjectContext
+        }
+        return nil
+    }
+    
+    fileprivate static var privateBackgroundManagedObjectContext: NSManagedObjectContext?
 }

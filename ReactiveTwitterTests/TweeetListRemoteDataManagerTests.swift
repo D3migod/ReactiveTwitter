@@ -14,91 +14,60 @@ import Result
 
 class TweetListRemoteDataManagerTests: XCTestCase {
     
-    fileprivate func create(_ account: Signal<TwitterAccount.AccountStatus, NoError>) -> TweetListRemoteDataManager {
-        
-        let jsonProvider: (AccessToken, TweetListCursor) -> SignalProducer<Data, NoError> = { _, _ in
-            return SignalProducer<Data, NoError>(value: TweetsData.tweetsJson)
-        }
-        return TweetListRemoteDataManager(
-            account: account,
-            jsonProvider: jsonProvider)
+    let authorizedAccount = SignalProducer<TwitterAccount.AccountStatus, NoError> { observer, _ in
+        observer.send(value: TwitterAccount.AccountStatus.authorized(AccessToken()))
+        observer.sendCompleted()
     }
     
-    // Creating custom assertion because Tweet's equality function compares id values only.
-    fileprivate func AssertSingleTweetsEqual(
-        _ firstTweet: Tweet, _ secondTweet: Tweet,
-        file: StaticString = #file, line: UInt = #line
-        ) {
-        XCTAssertEqual(firstTweet.id, secondTweet.id, "id",
-                       file: file, line: line)
-        XCTAssertEqual(firstTweet.text, secondTweet.text, "text",
-                       file: file, line: line)
-        XCTAssertEqual(firstTweet.name, secondTweet.name, "name",
-                       file: file, line: line)
-        XCTAssertEqual(firstTweet.created, secondTweet.created, "created",
-                       file: file, line: line)
-        XCTAssertEqual(firstTweet.imageUrl, secondTweet.imageUrl, "image url",
-                       file: file, line: line)
+    let unauthorizedAccount = SignalProducer<TwitterAccount.AccountStatus, NoError> { observer, _ in
+        observer.send(value: TwitterAccount.AccountStatus.unavailable)
+        observer.sendCompleted()
     }
     
-    fileprivate func AssertMultipleTweetsEqual(
-        _ firstTweets: [Tweet], _ secondTweets: [Tweet],
-        file: StaticString = #file, line: UInt = #line
-        ) {
-        Array(zip(firstTweets, secondTweets)).forEach{AssertSingleTweetsEqual($0.0, $0.1, file: file, line: line)}
+    let query: Query = ((nil, nil, 10), "Test")
+    
+    fileprivate func createDataProvider(account: SignalProducer<TwitterAccount.AccountStatus, NoError>) -> SignalProducer<[Tweet], NoError> {
+        let remoteDataManager = TweetListRemoteDataManager(account: account)
+        return remoteDataManager.createDataProvider(jsonProvider: TwitterAPI.getTweetList(for: query))
     }
     
-    func fields_are_filled_on_init() {
-        
+    fileprivate func createUnauthorizedDataProvider() -> SignalProducer<[Tweet], NoError> {
+        return createDataProvider(account: unauthorizedAccount)
+    }
+    
+    fileprivate func createAuthorizedDataProvider() -> SignalProducer<[Tweet], NoError> {
+        return createDataProvider(account: authorizedAccount)
     }
  
     func test_sending_tweets_on_start() {
-        let (account, observer) = Signal<TwitterAccount.AccountStatus, NoError>.pipe()
-        let remoteDataManager = create(account)
-        
-        observer.send(value: .authorized(AccessToken()))
-        remoteDataManager.tweetsProducer.startWithValues { [weak self] value in
+        createAuthorizedDataProvider().startWithValues { [weak self] value in
             self?.AssertMultipleTweetsEqual(value, TweetsData.tweets)
         }
     }
     
     func test_not_sending_tweets_on_anauthorized_account() {
-        let (account, observer) = Signal<TwitterAccount.AccountStatus, NoError>.pipe()
-        let remoteDataManager = create(account)
-        
-        observer.send(value: .unavailable)
         let resultObserver = Signal<[Tweet], NoError>.Observer(
             value: { _ in XCTFail() },
             interrupted: { XCTAssertTrue(true)}
         )
-        let disposable = remoteDataManager.tweetsProducer.start(resultObserver)
-        disposable.dispose()
+        createUnauthorizedDataProvider().start(resultObserver)
     }
     
-    func test_start_sending_tweets_on_authorization() {
-        let (account, observer) = Signal<TwitterAccount.AccountStatus, NoError>.pipe()
-        let remoteDataManager = create(account)
-        
-        observer.send(value: .unavailable)
-        remoteDataManager.tweetsProducer.startWithValues { [weak self] value in
+    func test_changing_authorization_status() {
+        var isAuthorized = true
+        let changingStatusAccount = SignalProducer<TwitterAccount.AccountStatus, NoError> { observer, _ in
+            isAuthorized = !isAuthorized
+            observer.send(value: isAuthorized ? TwitterAccount.AccountStatus.authorized(AccessToken()) : TwitterAccount.AccountStatus.unavailable)
+            observer.sendCompleted()
+        }
+        let dataProvider = createDataProvider(account: changingStatusAccount)
+        let resultObserver = Signal<[Tweet], NoError>.Observer(
+            value: { _ in XCTFail() },
+            interrupted: { XCTAssertTrue(true)}
+        )
+        dataProvider.start(resultObserver)
+        dataProvider.startWithValues { [weak self] value in
             self?.AssertMultipleTweetsEqual(value, TweetsData.tweets)
         }
-        observer.send(value: .authorized(AccessToken()))
-    }
-    
-    func test_current_cursor_pointing_on_start() {
-    
-    }
-    
-    func test_current_cursor_pointing_on_middle_after_shift() {
-        
-    }
-    
-    func test_current_cursor_zero_tweets() {
-        
-    }
-    
-    func test_no_feed_on_paused() {
-        
     }
 }
