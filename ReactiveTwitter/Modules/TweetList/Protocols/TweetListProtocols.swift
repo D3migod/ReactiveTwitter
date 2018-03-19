@@ -8,72 +8,73 @@
 
 import UIKit
 import ReactiveSwift
+import Result
+
+// MARK: - Typealias
+
+typealias MinTweetId = Int64?
+
+typealias MaxTweetId = Int64?
+
+typealias TweetsCount = Int
+
+typealias SearchString = String
+
+typealias PrefetchCellIndices = [Int]
+
+typealias Query = ((MinTweetId, MaxTweetId, TweetsCount), SearchString)
 
 protocol TweetListViewProtocol: class {
-    var presenter: TweetListPresenterProtocol? { get set }
-    
-    // PRESENTER -> VIEW
-    func showTweets(with Tweets: [Tweet])
-    
-    func showError()
-    
-    func showLoading()
-    
-    func hideLoading()
+    // Properties
+    var presenter: TweetListPresenterProtocol! { get set }
 }
 
 protocol TweetListWireFrameProtocol: class {
-    static func createTweetListModule() -> UIViewController
-    // PRESENTER -> WIREFRAME
-    func presentTweetDetailScreen(from view: TweetListViewProtocol, forTweet Tweet: Tweet)
+    // Initializer
+    static func createConnections(account: SignalProducer<TwitterAccount.AccountStatus, NoError>) -> UIViewController
 }
 
 protocol TweetListPresenterProtocol: class {
-    var view: TweetListViewProtocol? { get set }
-    var interactor: TweetListInteractorInputProtocol? { get set }
-    var wireFrame: TweetListWireFrameProtocol? { get set }
+    // Properties
+    var interactor: TweetListInteractorProtocol! { get set }
+    var wireFrame: TweetListWireFrameProtocol! { get set }
     
-    var tweets: Property<[Tweet]> { get set }
-    var loggedIn: Property<Bool> { get set }
+    // Presenter -> View
+    var tweets: MutableProperty<[Tweet]>! { get }
     
-    func getTweet(at index: Int) -> Tweet
-    func getTweetsCount() -> Int
-}
-
-protocol TweetListInteractorOutputProtocol: class {
-    // INTERACTOR -> PRESENTER
-    func didRetrieveTweets(_ Tweets: [Tweet])
-    func onError()
-}
-
-protocol TweetListInteractorInputProtocol: class {
-    var presenter: TweetListInteractorOutputProtocol? { get set }
-    var localDatamanager: TweetListLocalDataManagerInputProtocol? { get set }
-    var remoteDatamanager: TweetListRemoteDataManagerInputProtocol? { get set }
+    // View -> Presenter
+    var prefetchObserver: Signal<([Int], String?), NoError>.Observer! { get }
     
-    // PRESENTER -> INTERACTOR
-    func retrieveTweetList()
+    // Interactor -> Presenter
+    var loggedIn: MutableProperty<Bool>! { get }
 }
 
-protocol TweetListDataManagerInputProtocol: class {
-    // INTERACTOR -> DATAMANAGER
-}
-
-protocol TweetListRemoteDataManagerInputProtocol: class {
-    var remoteRequestHandler: TweetListRemoteDataManagerOutputProtocol? { get set }
+protocol TweetListInteractorProtocol: class {
+    // Properties
+    var localDatamanager: TweetListLocalDataManagerProtocol! { get set }
+    var remoteDatamanager: TweetListRemoteDataManagerProtocol! { get set }
+    var account: SignalProducer<Bool, NoError>! { get set }
     
-    // INTERACTOR -> REMOTEDATAMANAGER
-    func retrieveTweetList()
+    // Presenter -> Interactor
+    var prefetchObserver: Signal<Query, NoError>.Observer! { get }
+    
+    // Interactor -> Presenter
+    var tweetsSignal: Signal<([Tweet], Query), NoError>! { get }
 }
 
-protocol TweetListRemoteDataManagerOutputProtocol: class {
-    // REMOTEDATAMANAGER -> INTERACTOR
-    func onTweetsRetrieved(_ Tweets: [Tweet])
-    func onError()
+protocol TweetListRemoteDataManagerProtocol: class {
+    // RemoteDataManager -> Interactor
+    func createDataProvider(jsonProvider: @escaping (AccessToken) -> SignalProducer<Data, NetworkError>) -> SignalProducer<[Tweet], NoError>
 }
 
-protocol TweetListLocalDataManagerInputProtocol: class {
-    // INTERACTOR -> LOCALDATAMANAGER
-    func retrieveTweetList() throws -> [Tweet]
-    func saveTweet(id: Int, title: String, imageUrl: String, thumbImageUrl: String) throws
+
+protocol TweetListLocalDataManagerProtocol: class {
+    // Interactor -> LocalDataManager
+    func save(_ tweets: [Tweet])
+    
+    // LocalDataManager -> Interactor
+    func getTweets(for query: Query) throws -> [Tweet]
+    
+    // Clears the entire database
+    func clear() throws
 }

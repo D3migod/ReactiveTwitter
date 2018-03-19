@@ -14,9 +14,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    let testing = NSClassFromString("XCTest") != nil
+    let account = TwitterAccount.shared.account
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        TwitterAccount.shared.set(key: "R7DxgkHrZx6jn6oNDDGdaChAU",
+                           secret: "sVszTxLLjm1CCLHt3u3FssMc5YZlYSksQjlPLWD59TM0wMWbbQ")
+        
+        if !testing {
+            window = UIWindow(frame: UIScreen.main.bounds)
+            window?.rootViewController = TweetListWireFrame.createConnections(account: account)
+            window?.makeKeyAndVisible()
+        }
         return true
     }
 
@@ -55,6 +64,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         */
         let container = NSPersistentContainer(name: "ReactiveTwitter")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+            container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+            container.viewContext.automaticallyMergesChangesFromParent = true
             if let error = error as NSError? {
                 // Replace this implementation with code to handle the error appropriately.
                 // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
