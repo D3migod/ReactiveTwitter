@@ -12,6 +12,7 @@ import Result
 
 @testable import ReactiveTwitter
 
+// TODO: Make tests serial
 class TweetListRemoteDataManagerTests: XCTestCase {
     
     let authorizedAccount = TwitterAccount.shared.account

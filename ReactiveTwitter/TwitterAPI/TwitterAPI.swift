@@ -31,7 +31,7 @@ protocol TwitterAPIProtcol {
     static func getTweetList(for query: Query) -> (AccessToken) -> SignalProducer<Data, NetworkError>
 }
 
-struct TwitterAPI: TwitterAPIProtcol {
+struct TwitterAPI: TwitterAPIProtcol { // TODO: Remove static functions
     
     fileprivate enum Address: String {
         case search = "search/tweets.json"

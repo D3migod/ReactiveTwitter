@@ -22,7 +22,7 @@ typealias SearchString = String
 
 typealias PrefetchCellIndices = [Int]
 
-typealias Query = ((MinTweetId, MaxTweetId, TweetsCount), SearchString)
+typealias Query = ((MinTweetId, MaxTweetId, TweetsCount), SearchString) // TODO: Change to struct
 
 protocol TweetListViewProtocol: class {
     // Properties

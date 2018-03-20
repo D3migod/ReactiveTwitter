@@ -53,7 +53,7 @@ class TwitterAccount {
     }
     
     /// Account
-    var account: SignalProducer<AccountStatus, NoError> {
+    var account: SignalProducer<AccountStatus, NoError> { // TODO: Change to property
         return SignalProducer<AccountStatus, NoError> { observer, _ in
             if let token = self.token {
                 observer.send(value: AccountStatus.authorized(token))
